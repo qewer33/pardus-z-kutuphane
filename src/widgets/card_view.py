@@ -28,10 +28,9 @@ from .card import ZLibCardData, ZLibCard
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card_view.ui")
 class ZLibCardView(Gtk.FlowBox):
-    __gtype_name__ = "ZLibCardView"
+    """Card view grid for library entries"""
 
-    card_icon = Gtk.Template.Child("card_icon")
-    card_title = Gtk.Template.Child("card_title")
+    __gtype_name__ = "ZLibCardView"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

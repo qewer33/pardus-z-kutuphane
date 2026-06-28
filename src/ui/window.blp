@@ -23,8 +23,25 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       }
     }
 
-    content: Gtk.ScrolledWindow {
-      $ZLibCardView card_view {}
+    content: Gtk.Stack card_stack {
+      Gtk.StackPage {
+        name: "empty";
+
+        child: Adw.StatusPage {
+          icon-name: "tr.org.pardus.zkutuphane-symbolic";
+          title: _("Kütüphane Boş");
+          description: _("Başlamak için bir Z-Kitap uygulaması ekleyin veya buraya sürükleyin");
+          vexpand: true;
+        };
+      }
+
+      Gtk.StackPage {
+        name: "cards";
+
+        child: Gtk.ScrolledWindow {
+          $ZLibCardView card_view {}
+        };
+      }
     };
   };
 }

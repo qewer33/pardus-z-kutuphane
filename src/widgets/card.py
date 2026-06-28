@@ -22,15 +22,21 @@ from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import GLib
 
+from dataclasses import dataclass
 
+
+@dataclass
 class ZLibCardData:
-    def __init__(self, title: str, icon: str):
-        self.title = title
-        self.icon = icon
+    """Library card dataclass"""
+
+    title: str
+    icon: str
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")
 class ZLibCard(Gtk.Button):
+    """Library card widget element"""
+
     __gtype_name__ = "ZLibCard"
 
     card_icon = Gtk.Template.Child()

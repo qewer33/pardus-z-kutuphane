@@ -28,9 +28,12 @@ from .widgets import ZLibCardData
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
 class ZLibAppWindow(Adw.ApplicationWindow):
+    """Main application window"""
+
     __gtype_name__ = "ZLibAppWindow"
 
     card_view = Gtk.Template.Child()
+    card_stack = Gtk.Template.Child()
     open_folder = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
@@ -38,6 +41,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         self.open_folder.connect("clicked", self.on_open_folder_clicked)
 
+        # setup drag & drop target
         drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
         drop_target.connect("drop", self.on_file_drop)
         self.add_controller(drop_target)
@@ -55,12 +59,8 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         if file is None:
             return
 
-        path = file.get_path()
-        if path is None:
-            return
-
         card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic")
-        self.card_view.add_card(card_data)
+        self.add_card(card_data)
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):
@@ -68,5 +68,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                 card_data = ZLibCardData(
                     file.get_basename(), "dialog-question-symbolic"
                 )
-                self.card_view.add_card(card_data)
+                self.add_card(card_data)
+
+    def add_card(self, card_data: ZLibCardData) -> None:
+        self.card_view.add_card(card_data)
+        self.card_stack.set_visible_child_name("cards")
 
