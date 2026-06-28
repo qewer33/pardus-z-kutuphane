@@ -1,0 +1,47 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $ZLibCard: Button {
+  styles [
+    "card",
+    "flat",
+  ]
+
+  Adw.Bin {
+    margin-top: 12;
+    margin-bottom: 12;
+    margin-start: 12;
+    margin-end: 12;
+
+    AspectFrame {
+      ratio: 1.0;
+      obey-child: false;
+      halign: center;
+      valign: center;
+      width-request: 64;
+      height-request: 64;
+
+      Image card_icon {
+        overflow: hidden;
+        valign: fill;
+        halign: fill;
+        icon-name: "image-missing";
+        icon-size: large;
+      }
+
+      Label card_title {
+        label: _("Card Title");
+        justify: center;
+        wrap: true;
+        wrap-mode: word_char;
+        max-width-chars: 15;
+        ellipsize: end;
+
+        styles [
+          "heading",
+          "body",
+        ]
+      }
+    }
+  }
+}

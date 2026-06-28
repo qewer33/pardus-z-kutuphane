@@ -1,0 +1,9 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+data/tr.org.pardus.zkutuphane.desktop.in
+data/tr.org.pardus.zkutuphane.metainfo.xml.in
+data/tr.org.pardus.zkutuphane.gschema.xml
+src/main.py
+src/ui/shortcuts-dialog.blp
+src/ui/window.blp
+src/window.py

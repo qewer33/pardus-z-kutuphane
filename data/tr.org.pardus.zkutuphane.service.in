@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=tr.org.pardus.zkutuphane
+Exec=@bindir@/pardus-z-kutuphane --gapplication-service

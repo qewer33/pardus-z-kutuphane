@@ -1,0 +1,83 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the pardus-z-kutuphane package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: pardus-z-kutuphane\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-28 14:18+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: data/tr.org.pardus.zkutuphane.desktop.in:2
+#: data/tr.org.pardus.zkutuphane.metainfo.xml.in:7 src/ui/window.blp:5
+msgid "Pardus-z-kutuphane"
+msgstr ""
+
+#: data/tr.org.pardus.zkutuphane.desktop.in:8
+msgid "GTK;"
+msgstr ""
+
+#: data/tr.org.pardus.zkutuphane.metainfo.xml.in:8
+msgid "Keep the summary shorter, between 10 and 35 characters"
+msgstr ""
+
+#: data/tr.org.pardus.zkutuphane.metainfo.xml.in:10
+msgid "No description"
+msgstr ""
+
+#: data/tr.org.pardus.zkutuphane.metainfo.xml.in:14
+msgid "Developer name"
+msgstr ""
+
+#: data/tr.org.pardus.zkutuphane.metainfo.xml.in:52
+#: data/tr.org.pardus.zkutuphane.metainfo.xml.in:56
+msgid "A caption"
+msgstr ""
+
+#. Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
+#: src/main.py:61
+msgid "translator-credits"
+msgstr ""
+
+#: src/ui/shortcuts-dialog.blp:6
+msgid "Shortcuts"
+msgstr ""
+
+#: src/ui/shortcuts-dialog.blp:9
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr ""
+
+#: src/ui/shortcuts-dialog.blp:14
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr ""
+
+#: src/ui/window.blp:16
+msgid "Main Menu"
+msgstr ""
+
+#: src/ui/window.blp:22
+msgid "Hello, World!"
+msgstr ""
+
+#: src/ui/window.blp:34
+msgid "_Preferences"
+msgstr ""
+
+#: src/ui/window.blp:39
+msgid "_Keyboard Shortcuts"
+msgstr ""
+
+#: src/ui/window.blp:44
+msgid "_About Pardus-z-kutuphane"
+msgstr ""

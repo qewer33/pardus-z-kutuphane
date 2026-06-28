@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="pardus-z-kutuphane">
+	<schema id="tr.org.pardus.zkutuphane" path="/tr/org/pardus/zkutuphane/">
+	</schema>
+</schemalist>
