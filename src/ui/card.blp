@@ -13,20 +13,29 @@ template $ZLibCard: Button {
     margin-start: 12;
     margin-end: 12;
 
-    AspectFrame {
-      ratio: 1.0;
-      obey-child: false;
+    Box {
+      orientation: vertical;
+      spacing: 12;
       halign: center;
-      valign: center;
-      width-request: 64;
-      height-request: 64;
+      valign: fill;
+      vexpand: true;
 
-      Image card_icon {
-        overflow: hidden;
-        valign: fill;
-        halign: fill;
-        icon-name: "image-missing";
-        icon-size: large;
+      AspectFrame {
+        ratio: 1.0;
+        obey-child: false;
+        halign: center;
+        valign: start;
+        vexpand: true;
+        width-request: 64;
+        height-request: 64;
+
+        Image card_icon {
+          overflow: hidden;
+          valign: fill;
+          halign: fill;
+          icon-name: "image-missing";
+          icon-size: large;
+        }
       }
 
       Label card_title {
@@ -36,6 +45,7 @@ template $ZLibCard: Button {
         wrap-mode: word_char;
         max-width-chars: 15;
         ellipsize: end;
+        valign: end;
 
         styles [
           "heading",
