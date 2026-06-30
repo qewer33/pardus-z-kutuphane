@@ -34,7 +34,7 @@ class ZLibCardData:
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")
-class ZLibCard(Gtk.Button):
+class ZLibCard(Adw.Bin):
     """Library card widget element"""
 
     __gtype_name__ = "ZLibCard"
@@ -45,6 +45,7 @@ class ZLibCard(Gtk.Button):
     def __init__(self, data: ZLibCardData, **kwargs):
         super().__init__(**kwargs)
 
+        self.data = data
         self.card_title.set_text(data.title)
         self.card_icon.set_from_icon_name(data.icon)
 

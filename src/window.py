@@ -35,16 +35,31 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_view = Gtk.Template.Child()
     card_stack = Gtk.Template.Child()
     open_folder = Gtk.Template.Child()
+    card_action_bar = Gtk.Template.Child()
+    card_selected_label = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # setup file open and drag & drop actions
         self.open_folder.connect("clicked", self.on_open_folder_clicked)
 
-        # setup drag & drop target
         drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
         drop_target.connect("drop", self.on_file_drop)
         self.add_controller(drop_target)
+
+        # setup card view actions
+        self.card_view.connect("card-selected", self.on_card_selected)
+
+        for name, handler in (
+            ("launch-card", self.on_launch_card),
+            ("configure-card", self.on_configure_card),
+        ):
+            action = Gio.SimpleAction.new(name, None)
+            action.connect("activate", handler)
+            self.add_action(action)
+
+    # file open signal handlers
 
     def on_open_folder_clicked(self, _button: Gtk.Button):
         dialog = Gtk.FileDialog()
@@ -70,7 +85,26 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                 )
                 self.add_card(card_data)
 
+    # card view signal handlers
+
     def add_card(self, card_data: ZLibCardData) -> None:
         self.card_view.add_card(card_data)
         self.card_stack.set_visible_child_name("cards")
+
+    def on_card_selected(self, _view, card_data):
+        if card_data is None:
+            self.card_action_bar.set_revealed(False)
+            return
+        self.card_selected_label.set_text(card_data.title)
+        self.card_action_bar.set_revealed(True)
+
+    def on_launch_card(self, _action, _param):
+        card = self.card_view.get_selected_card()
+        if card is None:
+            return
+        # TODO
+
+    def on_configure_card(self, _action, _param):
+        card = self.card_view.get_selected_card()
+        # TODO
 

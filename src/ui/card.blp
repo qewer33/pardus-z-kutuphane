@@ -1,57 +1,53 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $ZLibCard: Button {
+template $ZLibCard: Adw.Bin {
   styles [
     "card",
-    "flat",
+    "acti",
   ]
 
-  Adw.Bin {
-    margin-top: 12;
-    margin-bottom: 12;
-    margin-start: 12;
-    margin-end: 12;
+  Box {
+    orientation: vertical;
+    spacing: 12;
+    halign: center;
+    valign: fill;
+    vexpand: true;
 
-    Box {
-      orientation: vertical;
-      spacing: 12;
+    AspectFrame {
+      ratio: 1.0;
+      obey-child: false;
       halign: center;
-      valign: fill;
+      valign: start;
       vexpand: true;
+      width-request: 64;
+      height-request: 64;
 
-      AspectFrame {
-        ratio: 1.0;
-        obey-child: false;
-        halign: center;
-        valign: start;
-        vexpand: true;
-        width-request: 64;
-        height-request: 64;
-
-        Image card_icon {
-          overflow: hidden;
-          valign: fill;
-          halign: fill;
-          icon-name: "image-missing";
-          icon-size: large;
-        }
+      Image card_icon {
+        overflow: hidden;
+        valign: fill;
+        halign: fill;
+        icon-name: "image-missing";
+        icon-size: large;
       }
+    }
 
-      Label card_title {
-        label: _("Card Title");
-        justify: center;
-        wrap: true;
-        wrap-mode: word_char;
-        max-width-chars: 15;
-        ellipsize: end;
-        valign: end;
+    Label card_title {
+      label: _("Card Title");
+      justify: center;
+      wrap: true;
+      wrap-mode: word_char;
+      max-width-chars: 15;
+      ellipsize: end;
+      valign: end;
+      margin-bottom: 12;
+      margin-start: 12;
+      margin-end: 12;
 
-        styles [
-          "heading",
-          "body",
-        ]
-      }
+      styles [
+        "heading",
+        "body",
+      ]
     }
   }
 }

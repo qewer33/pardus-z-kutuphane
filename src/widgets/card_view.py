@@ -17,10 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import Adw
 from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import Gio
+from gi.repository import GObject
 
 
 from .card import ZLibCardData, ZLibCard
@@ -32,14 +30,29 @@ class ZLibCardView(Gtk.FlowBox):
 
     __gtype_name__ = "ZLibCardView"
 
+    __gsignals__ = {
+        "card-selected": (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+    }
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.init_template()
 
         self.cards_data_list: [ZLibCardData] = []  # main data list
 
+        self.connect("selected-children-changed", self._on_selection_changed)
+
     def add_card(self, card_data: ZLibCardData):
         self.cards_data_list.append(card_data)
         card = ZLibCard(card_data)
         self.insert(card, -1)
+
+    def get_selected_card(self):
+        children = self.get_selected_children()
+        if not children:
+            return None
+        return children[0].get_child().data
+
+    def _on_selection_changed(self, _flowbox):
+        self.emit("card-selected", self.get_selected_card())
 

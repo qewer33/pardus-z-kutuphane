@@ -23,6 +23,37 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       }
     }
 
+    [bottom]
+    Gtk.ActionBar card_action_bar {
+      revealed: false;
+
+      [start]
+      Gtk.Label card_selected_label {
+        styles [
+          "heading",
+        ]
+
+        max-width-chars: 30;
+        ellipsize: end;
+      }
+
+      [end]
+      Gtk.Button {
+        label: _("Çalıştır");
+        action-name: "win.launch-card";
+
+        styles [
+          "suggested-action",
+        ]
+      }
+
+      [end]
+      Gtk.Button {
+        label: _("Yapılandır");
+        action-name: "win.configure-card";
+      }
+    }
+
     content: Gtk.Stack card_stack {
       Gtk.StackPage {
         name: "empty";
