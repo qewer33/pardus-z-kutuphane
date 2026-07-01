@@ -25,7 +25,6 @@ from gi.repository import GLib
 
 from .widgets import ZLibCardData
 
-
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
 class ZLibAppWindow(Adw.ApplicationWindow):
     """Main application window"""
@@ -50,7 +49,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         # setup card view actions
         self.card_view.connect("card-selected", self.on_card_selected)
-
+        
         for name, handler in (
             ("launch-card", self.on_launch_card),
             ("configure-card", self.on_configure_card),
@@ -62,26 +61,32 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     # file open signal handlers
 
     def on_open_folder_clicked(self, _button: Gtk.Button):
-        dialog = Gtk.FileDialog()
-        dialog.set_title("Bir Z-Kitap Uygulaması Seçin...")
-        dialog.open(self, None, self.on_folder_chosen)
+        try:
+            dialog = Gtk.FileDialog()
+            dialog.set_title("Bir Z-Kitap Uygulaması Seçin...")
+            dialog.open(self, None, self.on_folder_chosen)
+        except GLib.Error:
+            print("FileDialog error:", e.message, e.domain, e.code)
+            return
 
     def on_folder_chosen(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
         try:
             file = dialog.open_finish(result)
         except GLib.Error:
+            print("FileDialog error:", e.message, e.domain, e.code)
             return
         if file is None:
             return
 
-        card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic")
+        card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", file.get_path())
         self.add_card(card_data)
+        print(card_data.type)
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):
             for file in file_list:
                 card_data = ZLibCardData(
-                    file.get_basename(), "dialog-question-symbolic"
+                    file.get_basename(), "dialog-question-symbolic", file.get_path()
                 )
                 self.add_card(card_data)
 
@@ -99,12 +104,13 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         self.card_action_bar.set_revealed(True)
 
     def on_launch_card(self, _action, _param):
-        card = self.card_view.get_selected_card()
-        if card is None:
+        card_data = self.card_view.get_selected_card()
+        if card_data is None:
             return
+        card_data.run()
         # TODO
 
     def on_configure_card(self, _action, _param):
-        card = self.card_view.get_selected_card()
+        card_data = self.card_view.get_selected_card()
         # TODO
 

@@ -1,7 +1,7 @@
 {
     "id" : "tr.org.pardus.zkutuphane",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "master",
+    "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",
     "command" : "pardus-z-kutuphane",
     "finish-args" : [

@@ -17,6 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from enum import Enum
+
 from gi.repository import Adw
 from gi.repository import Gtk
 from gi.repository import Gio
@@ -24,6 +26,39 @@ from gi.repository import GLib
 
 from dataclasses import dataclass
 
+from ..backend import WineBackend
+from ..backend import ELFBackend
+
+import subprocess
+
+def get_binary_type(path) -> CardType:
+    try:
+        result = subprocess.run(
+            ["file", path],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        output = result.stdout.lower()
+
+        if "appimage" in output:
+            return CardType.APPIMAGE
+        elif "elf" in output:
+            return CardType.ELF
+        elif "pe32" in output or "ms-dos executable" in output:
+            return CardType.EXE
+        else:
+            return CardType.OTHER
+
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"file command failed: {e.stderr}") from e
+
+class CardType(Enum):
+    EXE = 1
+    ELF = 2
+    APPIMAGE = 3
+    OTHER = 4
 
 @dataclass
 class ZLibCardData:
@@ -31,7 +66,31 @@ class ZLibCardData:
 
     title: str
     icon: str
+    path: str
+    arguments: list[str] = None
+    type: CardType = CardType.OTHER
 
+    _wine = WineBackend()
+    _elf = ELFBackend()
+
+    def __init__(self, title, icon, path, arguments = None):
+        self.title = title
+        self.icon = icon
+        self.path = path
+        self.arguments = arguments
+
+        self.type = get_binary_type(path)
+
+    def run(self):
+        if self.type ==  CardType.ELF or self.type == CardType.APPIMAGE:
+            return self._elf.launch(
+                executable = self.path
+            )
+        elif self.type == CardType.EXE:
+            return self._wine.launch(
+                executable=self.path,
+                arguments=self.arguments,
+            )
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")
 class ZLibCard(Adw.Bin):
@@ -48,4 +107,5 @@ class ZLibCard(Adw.Bin):
         self.data = data
         self.card_title.set_text(data.title)
         self.card_icon.set_from_icon_name(data.icon)
+
 
