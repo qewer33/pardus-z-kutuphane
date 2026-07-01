@@ -80,7 +80,6 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", file.get_path())
         self.add_card(card_data)
-        print(card_data.type)
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):

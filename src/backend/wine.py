@@ -3,6 +3,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from gi.repository import GLib
 
 class WineError(Exception):
     """Raised for Wine-related errors."""
@@ -12,12 +13,13 @@ class WineBackend:
     def __init__(
         self,
         wine_binary: str = "wine",
-        prefix: str | Path | None = None,
+        wine_prefix: str | Path | None = Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "wineprefix",
         workdir: str | Path | None = None,
     ):
         self.wine_binary = wine_binary
-        self.prefix = Path(prefix).expanduser() if prefix else None
+        self.wine_prefix = Path(wine_prefix).expanduser() if wine_prefix else None
         self.workdir = Path(workdir).expanduser() if workdir else None
+        wine_prefix.mkdir(parents=True, exist_ok=True)
 
     def is_installed(self) -> bool:
         """Return True if the Wine executable exists."""
@@ -26,8 +28,8 @@ class WineBackend:
     def _environment(self) -> dict:
         env = os.environ.copy()
 
-        if self.prefix:
-            env["WINEPREFIX"] = str(self.prefix)
+        if self.wine_prefix:
+            env["WINEPREFIX"] = str(self.wine_prefix)
 
         return env
 

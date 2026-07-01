@@ -17,19 +17,20 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import subprocess
+import os
 from enum import Enum
+from pathlib import Path
 
 from gi.repository import Adw
 from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import GLib
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..backend import WineBackend
 from ..backend import ELFBackend
-
-import subprocess
 
 def get_binary_type(path) -> CardType:
     try:
@@ -54,33 +55,33 @@ def get_binary_type(path) -> CardType:
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"file command failed: {e.stderr}") from e
 
-class CardType(Enum):
-    EXE = 1
-    ELF = 2
-    APPIMAGE = 3
-    OTHER = 4
+class CardType(str, Enum):
+    EXE = "exe"
+    ELF = "elf"
+    APPIMAGE = "appimage"
+    OTHER = "other"
+
 
 @dataclass
 class ZLibCardData:
     """Library card dataclass"""
-
     title: str
     icon: str
     path: str
-    arguments: list[str] = None
-    type: CardType = CardType.OTHER
+    arguments: list[str] | None = None
+    wine_prefix: Path = field(
+        default_factory=lambda: (
+            Path(GLib.get_user_data_dir())
+            / "tr.org.pardus.zkutuphane"
+            / "wineprefix"
+        )
+    )
 
-    _wine = WineBackend()
-    _elf = ELFBackend()
-
-    def __init__(self, title, icon, path, arguments = None):
-        self.title = title
-        self.icon = icon
-        self.path = path
-        self.arguments = arguments
-
-        self.type = get_binary_type(path)
-
+    def __post_init__(self):
+        self.type = get_binary_type(self.path) 
+        self._wine = WineBackend(wine_prefix = self.wine_prefix)
+        self._elf = ELFBackend()
+    
     def run(self):
         if self.type ==  CardType.ELF or self.type == CardType.APPIMAGE:
             return self._elf.launch(
