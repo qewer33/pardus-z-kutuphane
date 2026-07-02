@@ -1,4 +1,3 @@
-from .launcher import Launcher
 from .wine import WineBackend
 from .elf import ELFBackend
 
