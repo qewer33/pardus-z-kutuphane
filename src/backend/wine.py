@@ -5,9 +5,12 @@ from pathlib import Path
 
 from gi.repository import GLib
 
+from ..util.logger import get_logger
+
+logger = get_logger(os.path.basename(__file__))
+
 class WineError(Exception):
     """Raised for Wine-related errors."""
-
 
 class WineBackend:
     def __init__(
@@ -58,6 +61,8 @@ class WineBackend:
 
         cwd = self.workdir or executable.parent
 
+        logger.info(f"Current working directory is: {cwd}")
+        logger.info(f"Launching PE: WINEPREFIX={self.wine_prefix} {self.wine_binary} {executable} {arguments}")
         return subprocess.Popen(
             command,
             cwd=cwd,
@@ -66,6 +71,7 @@ class WineBackend:
 
     def winecfg(self):
         """Open winecfg."""
+        logger.info("Opening winecfg")
         subprocess.Popen(
             [self.wine_binary, "winecfg"],
             env=self._environment(),
@@ -73,6 +79,7 @@ class WineBackend:
 
     def explorer(self, path: str | Path):
         """Open Wine Explorer."""
+        logger.info("Opening explorer")
         subprocess.Popen(
             [self.wine_binary, "explorer", str(path)],
             env=self._environment(),
@@ -80,6 +87,7 @@ class WineBackend:
 
     def run_command(self, *args):
         """Run any Wine command."""
+        logger.info(f"Running command: {self.wine_binary} {args}")
         subprocess.Popen(
             [self.wine_binary, *args],
             env=self._environment(),

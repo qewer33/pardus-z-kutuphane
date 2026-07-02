@@ -90,3 +90,17 @@ for f in sorted(glob.glob(os.path.join(subdir, 'backend', '*.py'))):
 ).stdout().strip().split('\n')
 
 install_data(backend_sources, install_dir: moduledir / 'backend')
+
+util_sources = run_command(
+  find_program('python3'),
+  '-c',
+  '''
+import glob, os
+subdir = os.path.join(os.environ['MESON_SOURCE_ROOT'], os.environ['MESON_SUBDIR'])
+for f in sorted(glob.glob(os.path.join(subdir, 'util', '*.py'))):
+    print(os.path.relpath(f, subdir))
+''',
+  check: true,
+).stdout().strip().split('\n')
+
+install_data(util_sources, install_dir: moduledir / 'util')

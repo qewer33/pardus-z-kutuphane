@@ -17,6 +17,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
 from gi.repository import Adw
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -24,6 +25,9 @@ from gi.repository import Gio
 from gi.repository import GLib
 
 from .widgets import ZLibCardData
+from .util.logger import get_logger
+
+logger = get_logger(os.path.basename(__file__))
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
 class ZLibAppWindow(Adw.ApplicationWindow):
@@ -66,20 +70,21 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             dialog.set_title("Bir Z-Kitap Uygulaması Seçin...")
             dialog.open(self, None, self.on_folder_chosen)
         except GLib.Error:
-            print("FileDialog error:", e.message, e.domain, e.code)
+            logger.error("FileDialog error:", e.message, e.domain, e.code)
             return
 
     def on_folder_chosen(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
         try:
             file = dialog.open_finish(result)
         except GLib.Error:
-            print("FileDialog error:", e.message, e.domain, e.code)
+            logger.error("FileDialog error:", e.message, e.domain, e.code)
             return
         if file is None:
             return
 
         card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", file.get_path())
         self.add_card(card_data)
+        logger.info(f"Added card: {card_data.path}, Type:{card_data.type}")
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):
@@ -88,6 +93,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                     file.get_basename(), "dialog-question-symbolic", file.get_path()
                 )
                 self.add_card(card_data)
+                logger.info(f"Added card: {card_data.path}, Type:{card_data.type}")
 
     # card view signal handlers
 

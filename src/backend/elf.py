@@ -3,10 +3,12 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from ..util.logger import get_logger
+
+logger = get_logger(os.path.basename(__file__))
 
 class ELFError(Exception):
     """Raised for Wine-related errors."""
-
 
 class ELFBackend:
     def __init__(
@@ -36,6 +38,8 @@ class ELFBackend:
 
         cwd = self.workdir or executable.parent
 
+        logger.info(f"Current working directory is: {cwd}")
+        logger.info(f"Launching ELF: {executable} {arguments}")
         return subprocess.Popen(
             command,
             cwd=cwd,
