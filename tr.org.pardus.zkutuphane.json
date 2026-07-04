@@ -1,7 +1,7 @@
 {
     "id" : "tr.org.pardus.zkutuphane",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "50",
+    "runtime-version" : "master",
     "sdk" : "org.gnome.Sdk",
     "command" : "pardus-z-kutuphane",
     "finish-args" : [
@@ -9,7 +9,8 @@
         "--share=ipc",
         "--socket=fallback-x11",
         "--device=dri",
-        "--socket=wayland"
+        "--socket=wayland",
+        "--filesystem=host"
     ],
     "cleanup" : [
         "/include",

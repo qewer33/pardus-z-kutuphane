@@ -32,6 +32,14 @@ from dataclasses import dataclass, field
 from ..backend import WineBackend
 from ..backend import ELFBackend
 
+
+class CardType(str, Enum):
+    EXE = "exe"
+    ELF = "elf"
+    APPIMAGE = "appimage"
+    OTHER = "other"
+
+
 def get_binary_type(path) -> CardType:
     try:
         result = subprocess.run(
@@ -55,43 +63,35 @@ def get_binary_type(path) -> CardType:
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"file command failed: {e.stderr}") from e
 
-class CardType(str, Enum):
-    EXE = "exe"
-    ELF = "elf"
-    APPIMAGE = "appimage"
-    OTHER = "other"
-
 
 @dataclass
 class ZLibCardData:
     """Library card dataclass"""
+
     title: str
     icon: str
     path: str
     arguments: list[str] | None = None
     wine_prefix: Path = field(
         default_factory=lambda: (
-            Path(GLib.get_user_data_dir())
-            / "tr.org.pardus.zkutuphane"
-            / "wineprefix"
+            Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "wineprefix"
         )
     )
 
     def __post_init__(self):
-        self.type = get_binary_type(self.path) 
-        self._wine = WineBackend(wine_prefix = self.wine_prefix)
+        self.type = get_binary_type(self.path)
+        self._wine = WineBackend(wine_prefix=self.wine_prefix)
         self._elf = ELFBackend()
-    
+
     def run(self):
-        if self.type ==  CardType.ELF or self.type == CardType.APPIMAGE:
-            return self._elf.launch(
-                executable = self.path
-            )
+        if self.type == CardType.ELF or self.type == CardType.APPIMAGE:
+            return self._elf.launch(executable=self.path)
         elif self.type == CardType.EXE:
             return self._wine.launch(
                 executable=self.path,
                 arguments=self.arguments,
             )
+
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")
 class ZLibCard(Adw.Bin):
@@ -108,5 +108,4 @@ class ZLibCard(Adw.Bin):
         self.data = data
         self.card_title.set_text(data.title)
         self.card_icon.set_from_icon_name(data.icon)
-
 
