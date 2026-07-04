@@ -17,7 +17,37 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from .wine import WineBackend
+from .elf import ELFBackend
+from .typedetector import TypeDetector, ExecutableType
 
 class Launcher:
-    def __init__(self) -> None:
-        pass
+    """Stateless Launcher class"""
+    def __new__(cls):
+        raise TypeError("Launcher is a static utility class")
+    
+    @staticmethod
+    def launch(app):
+        """
+        Expected fields of app
+        (in our case this function is going to accept ZLibCardData instances) 
+
+        path: str
+        type: str
+        wine_prefix: str
+        """
+        if app.type in (
+                ExecutableType.ELF ,
+                ExecutableType.APPIMAGE_V1,
+                ExecutableType.APPIMAGE_V2,
+        ):
+            
+            return ELFBackend.launch(executable=app.path)
+        elif app.type in (ExecutableType.PE32,
+                          ExecutableType.PE64,
+                          ):
+            return WineBackend.launch(
+                executable=app.path,
+                arguments=app.arguments,
+                wine_prefix=app.wine_prefix
+            )

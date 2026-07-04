@@ -26,6 +26,7 @@ from gi.repository import GLib
 
 from .widgets import ZLibCardData
 from .util.logger import get_logger
+from .backend import TypeDetector, Launcher
 
 logger = get_logger(os.path.basename(__file__))
 
@@ -40,7 +41,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     open_folder = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
-
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -69,31 +70,38 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             dialog = Gtk.FileDialog()
             dialog.set_title("Bir Z-Kitap Uygulaması Seçin...")
             dialog.open(self, None, self.on_folder_chosen)
-        except GLib.Error:
-            logger.error("FileDialog error:", e.message, e.domain, e.code)
+        except GLib.Error as e:
+            logger.error("FileDialog error: %s %s %s", e.message, e.domain, e.code)
             return
 
     def on_folder_chosen(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
         try:
             file = dialog.open_finish(result)
-        except GLib.Error:
-            logger.error("FileDialog error:", e.message, e.domain, e.code)
+        except GLib.Error as e:
+            if e.matches(Gtk.DialogError.quark(), Gtk.DialogError.DISMISSED):
+                # User cancelled the dialog. Don't log errors
+                return
+            logger.error("FileDialog error: %s %s %s", e.message, e.domain, e.code)
             return
         if file is None:
             return
 
-        card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", file.get_path())
+        path = file.get_path()
+        type = TypeDetector.get_executable_type(path)
+        card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", path, type)
         self.add_card(card_data)
-        logger.info(f"Added card: {card_data.path}, Type:{card_data.type}")
+        logger.info(f"Added card: %s, Type: %s", card_data.path, card_data.type)
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):
             for file in file_list:
-                card_data = ZLibCardData(
-                    file.get_basename(), "dialog-question-symbolic", file.get_path()
-                )
+
+                path = file.get_path()
+                type = TypeDetector.get_executable_type(path)
+                card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", path, type)
+
                 self.add_card(card_data)
-                logger.info(f"Added card: {card_data.path}, Type:{card_data.type}")
+                logger.info(f"Added card: %s, Type: %s", card_data.path, card_data.type)
 
     # card view signal handlers
 
@@ -112,7 +120,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         card_data = self.card_view.get_selected_card()
         if card_data is None:
             return
-        card_data.run()
+        Launcher.launch(card_data)
         # TODO
 
     def on_configure_card(self, _action, _param):

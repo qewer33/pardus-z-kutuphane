@@ -35,14 +35,11 @@ console_formatter = ColorFormatter(
     "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 )
 
-
 _file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
 _file_handler.setFormatter(file_formatter)
 
 _console_handler = logging.StreamHandler()
 _console_handler.setFormatter(console_formatter)
-
-
 
 logging.basicConfig(
     level=logging.INFO,
