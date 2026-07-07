@@ -24,7 +24,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from .backend import Launcher, TypeDetector
 from .util.logger import get_logger
-from .widgets import ZLibCardData
+from .widgets import LogWindow, ZLibCardData
 
 logger = get_logger(os.path.basename(__file__))
 
@@ -57,6 +57,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         for name, handler in (
             ("launch-card", self.on_launch_card),
             ("configure-card", self.on_configure_card),
+            ("show-log-card", self.on_show_log_card),
         ):
             action = Gio.SimpleAction.new(name, None)
             action.connect("activate", handler)
@@ -134,15 +135,30 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             return
 
         card_data.running = True
+        card_data.log_buffer.set_text("")
         self._update_launch_action()
 
         def _wait():
+            for line in process.stdout:
+                GLib.idle_add(self._append_log, card_data, line)
             process.wait()
             card_data.running = False
             logger.info("App exited: %s", card_data.path)
             GLib.idle_add(self._update_launch_action)
 
         threading.Thread(target=_wait, daemon=True).start()
+
+    def _append_log(self, card_data: ZLibCardData, line: str) -> int:
+        buffer = card_data.log_buffer
+        buffer.insert(buffer.get_end_iter(), line)
+        return GLib.SOURCE_REMOVE
+
+    def on_show_log_card(self, _action, _param):
+        card_data = self.card_view.get_selected_card()
+        if card_data is None:
+            return
+        log_window = LogWindow(card_data, transient_for=self)
+        log_window.present()
 
     def _update_launch_action(self) -> None:
         """Enable the launch button only for a selected not running card"""

@@ -42,4 +42,8 @@ class ELFBackend:
             command,
             cwd=cwd,
             env=os.environ.copy(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
         )

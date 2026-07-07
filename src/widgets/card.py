@@ -38,6 +38,7 @@ class ZLibCardData:
         )
     )
     running: bool = False
+    log_buffer: Gtk.TextBuffer = field(default_factory=Gtk.TextBuffer)
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")

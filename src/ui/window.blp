@@ -52,6 +52,12 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
         label: _("Yapılandır");
         action-name: "win.configure-card";
       }
+
+      [end]
+      Gtk.Button {
+        label: _("Günce");
+        action-name: "win.show-log-card";
+      }
     }
 
     content: Gtk.Stack card_stack {

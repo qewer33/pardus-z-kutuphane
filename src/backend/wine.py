@@ -108,6 +108,10 @@ class WineBackend:
             command,
             cwd=cwd,
             env=WineBackend._environment(wine_prefix),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
         )
 
     @staticmethod

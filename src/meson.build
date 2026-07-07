@@ -16,13 +16,22 @@ for f in sorted(glob.glob(os.path.join(subdir, 'ui', '*.blp'))):
   check: true,
 ).stdout().strip().split('\n')
 
+# Declare each compiled .ui as an explicit output so ninja tracks it against
+# its .blp. Using output: '.' (the build dir) breaks incremental rebuilds:
+# sibling targets writing into the dir bump its mtime, so blueprints never
+# look stale and edited .blp files get silently ignored.
+blueprint_outputs = []
+foreach bp : blueprint_files
+  blueprint_outputs += bp.split('/')[1].replace('.blp', '.ui')
+endforeach
+
 blueprints = custom_target('blueprints',
   input: files(blueprint_files),
-  output: '.',
+  output: blueprint_outputs,
   command: [
     find_program('blueprint-compiler'),
     'batch-compile',
-    '@OUTPUT@',
+    '@OUTDIR@',
     meson.current_source_dir() / 'ui',
     '@INPUT@',
   ],
