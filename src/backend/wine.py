@@ -31,6 +31,43 @@ class WineBackend:
         return env
 
     @staticmethod
+    def ensure_prefix(
+        wine_prefix: str | Path,
+        *,
+        wine_binary: str = "wine",
+    ) -> None:
+        """Initialize the wineprefix if it's not already set up"""
+
+        if not WineBackend.is_installed(wine_binary):
+            raise WineError("Wine is not installed.")
+
+        prefix = Path(wine_prefix).expanduser()
+        sentinel = prefix / "drive_c" / "windows" / "system32" / "shell32.dll"
+
+        if sentinel.exists():
+            return
+
+        # broken prefix, remoe it
+        if prefix.exists():
+            logger.warning("Removing broken/incomplete wineprefix: %s", prefix)
+            shutil.rmtree(prefix)
+
+        logger.info("Initializing wineprefix: WINEPREFIX=%s wineboot -i", prefix)
+
+        prefix.mkdir(parents=True, exist_ok=True)
+
+        result = subprocess.run(
+            ["wineboot", "-i"],
+            env=WineBackend._environment(prefix),
+        )
+
+        if result.returncode != 0 or not sentinel.exists():
+            raise WineError(
+                f"Failed to initialize wineprefix at {prefix} "
+                f"(wineboot exit code {result.returncode})."
+            )
+
+    @staticmethod
     def launch(
         executable: str | Path,
         *,
@@ -43,6 +80,9 @@ class WineBackend:
 
         if not WineBackend.is_installed(wine_binary):
             raise WineError("Wine is not installed.")
+
+        if wine_prefix is not None:
+            WineBackend.ensure_prefix(wine_prefix, wine_binary=wine_binary)
 
         executable = Path(executable).expanduser()
 
