@@ -18,18 +18,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
-import gi
-
 from gettext import gettext as _
+
+import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw
+from gi.repository import Adw, Gio, Gtk
+
 from .window import ZLibAppWindow
 
+
 class PardusZKutuphaneApplication(Adw.Application):
-    """The main application singleton class."""
+    """The main application singleton class"""
 
     def __init__(self):
         super().__init__(
@@ -42,32 +44,23 @@ class PardusZKutuphaneApplication(Adw.Application):
         self.create_action("preferences", self.on_preferences_action)
 
     def do_activate(self):
-        """Called when the application is activated.
-
-        We raise the application's main window, creating it if
-        necessary.
-        """
         win = self.props.active_window
         if not win:
             win = ZLibAppWindow(application=self)
         win.present()
 
     def on_about_action(self, *args):
-        """Callback for the app.about action."""
         about = Adw.AboutDialog(
-            application_name="Pardus-z-kutuphane",
+            application_name="Pardus Z-Kütüphane",
             application_icon="tr.org.pardus.zkutuphane",
             developer_name="qewer",
             version="0.1.0",
-            # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
-            translator_credits=_("translator-credits"),
             developers=["qewer"],
             copyright="© 2026 qewer",
         )
         about.present(self.props.active_window)
 
     def on_preferences_action(self, widget, _):
-        """Callback for the app.preferences action."""
         print("app.preferences action activated")
 
     def create_action(self, name, callback, shortcuts=None):
@@ -87,7 +80,5 @@ class PardusZKutuphaneApplication(Adw.Application):
 
 
 def main(version):
-    """The application's entry point."""
     app = PardusZKutuphaneApplication()
     return app.run(sys.argv)
-

@@ -1,6 +1,7 @@
-import subprocess
-import filetype
 from enum import Enum
+
+import filetype
+
 
 class ExecutableType(Enum):
     UNKNOWN = "unknown"
@@ -12,6 +13,7 @@ class ExecutableType(Enum):
 
     PE32 = "pe32"
     PE64 = "pe64"
+
 
 class TypeDetector:
     @staticmethod

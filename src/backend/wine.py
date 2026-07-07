@@ -9,15 +9,14 @@ from ..util.logger import get_logger
 
 logger = get_logger(os.path.basename(__file__))
 
+
 class WineError(Exception):
-    """Raised for Wine-related errors."""
+    """Raised for Wine-related errors"""
+
 
 class WineBackend:
-    """Stateless Wine backend."""
+    """Stateless Wine backend"""
 
-    def __new__(cls):
-        raise TypeError("WineBackend is a static utility class")
-    
     @staticmethod
     def is_installed(wine_binary: str = "wine") -> bool:
         return shutil.which(wine_binary) is not None
@@ -40,7 +39,7 @@ class WineBackend:
         wine_binary: str = "wine",
         workdir: str | Path | None = None,
     ) -> subprocess.Popen:
-        """Launch a Windows executable."""
+        """Launch a Windows executable"""
 
         if not WineBackend.is_installed(wine_binary):
             raise WineError("Wine is not installed.")

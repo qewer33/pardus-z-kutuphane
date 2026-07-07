@@ -20,4 +20,4 @@
 from .card import ZLibCard, ZLibCardData
 from .card_view import ZLibCardView
 
-__all__ = ['ZLibCard', 'ZLibCardData', 'ZLibCardView']
+__all__ = ["ZLibCard", "ZLibCardData", "ZLibCardView"]

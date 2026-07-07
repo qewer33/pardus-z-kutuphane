@@ -17,11 +17,9 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import Gtk
-from gi.repository import GObject
+from gi.repository import GObject, Gtk
 
-
-from .card import ZLibCardData, ZLibCard
+from .card import ZLibCard, ZLibCardData
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card_view.ui")
@@ -38,7 +36,7 @@ class ZLibCardView(Gtk.FlowBox):
         super().__init__(**kwargs)
         self.init_template()
 
-        self.cards_data_list: [ZLibCardData] = []  # main data list
+        self.cards_data_list: list[ZLibCardData] = []  # main data list
 
         self.connect("selected-children-changed", self._on_selection_changed)
 
@@ -55,4 +53,3 @@ class ZLibCardView(Gtk.FlowBox):
 
     def _on_selection_changed(self, _flowbox):
         self.emit("card-selected", self.get_selected_card())
-

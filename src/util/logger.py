@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 
 from gi.repository import GLib
@@ -11,13 +10,14 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_FILE = LOG_DIR / "app.log"
 
+
 class ColorFormatter(logging.Formatter):
     COLORS = {
-        logging.DEBUG: "\033[36m",      # Cyan
-        logging.INFO: "\033[32m",       # Green
-        logging.WARNING: "\033[33m",    # Yellow
-        logging.ERROR: "\033[31m",      # Red
-        logging.CRITICAL: "\033[35m",   # Magenta
+        logging.DEBUG: "\033[36m",  # Cyan
+        logging.INFO: "\033[32m",  # Green
+        logging.WARNING: "\033[33m",  # Yellow
+        logging.ERROR: "\033[31m",  # Red
+        logging.CRITICAL: "\033[35m",  # Magenta
     }
 
     RESET = "\033[0m"
@@ -26,6 +26,7 @@ class ColorFormatter(logging.Formatter):
         color = self.COLORS.get(record.levelno, self.RESET)
         record.levelname = f"{color}{record.levelname:<8}{self.RESET}"
         return super().format(record)
+
 
 file_formatter = logging.Formatter(
     "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
@@ -48,6 +49,7 @@ logging.basicConfig(
         _console_handler,
     ],
 )
+
 
 def get_logger(name: str):
     return logging.getLogger(name)

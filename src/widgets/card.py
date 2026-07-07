@@ -17,14 +17,11 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from gi.repository import Adw
-from gi.repository import Gtk
-from gi.repository import Gio
-from gi.repository import GLib
+from gi.repository import Adw, Gio, GLib, Gtk
 
-from dataclasses import dataclass, field
 
 @dataclass
 class ZLibCardData:
@@ -35,7 +32,7 @@ class ZLibCardData:
     path: str
     type: str
     arguments: list[str] | None = None
-    wine_prefix: str = field(
+    wine_prefix: Path = field(
         default_factory=lambda: (
             Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "wineprefix"
         )
@@ -57,4 +54,3 @@ class ZLibCard(Adw.Bin):
         self.data = data
         self.card_title.set_text(data.title)
         self.card_icon.set_from_icon_name(data.icon)
-

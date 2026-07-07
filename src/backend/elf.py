@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -7,14 +6,13 @@ from ..util.logger import get_logger
 
 logger = get_logger(os.path.basename(__file__))
 
+
 class ELFError(Exception):
-    """Raised for Wine-related errors."""
+    """Raised for Wine-related errors"""
+
 
 class ELFBackend:
-    """Stateless ELF backend."""
-
-    def __new__(cls):
-        raise TypeError("ELFBackend is a static utility class")
+    """Stateless ELF backend"""
 
     @staticmethod
     def launch(
@@ -23,7 +21,7 @@ class ELFBackend:
         arguments: list[str] | None = None,
         workdir: str | Path | None = None,
     ) -> subprocess.Popen:
-        """Launch an ELF executable."""
+        """Launch an ELF executable"""
 
         executable = Path(executable).expanduser()
 

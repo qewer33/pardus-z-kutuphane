@@ -18,17 +18,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
-from gi.repository import Adw
-from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import Gio
-from gi.repository import GLib
 
-from .widgets import ZLibCardData
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
+
+from .backend import Launcher, TypeDetector
 from .util.logger import get_logger
-from .backend import TypeDetector, Launcher
+from .widgets import ZLibCardData
 
 logger = get_logger(os.path.basename(__file__))
+
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
 class ZLibAppWindow(Adw.ApplicationWindow):
@@ -41,7 +39,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     open_folder = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -54,7 +52,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         # setup card view actions
         self.card_view.connect("card-selected", self.on_card_selected)
-        
+
         for name, handler in (
             ("launch-card", self.on_launch_card),
             ("configure-card", self.on_configure_card),
@@ -88,17 +86,20 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         path = file.get_path()
         type = TypeDetector.get_executable_type(path)
-        card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", path, type)
+        card_data = ZLibCardData(
+            file.get_basename(), "dialog-question-symbolic", path, type
+        )
         self.add_card(card_data)
         logger.info(f"Added card: %s, Type: %s", card_data.path, card_data.type)
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):
             for file in file_list:
-
                 path = file.get_path()
                 type = TypeDetector.get_executable_type(path)
-                card_data = ZLibCardData(file.get_basename(), "dialog-question-symbolic", path, type)
+                card_data = ZLibCardData(
+                    file.get_basename(), "dialog-question-symbolic", path, type
+                )
 
                 self.add_card(card_data)
                 logger.info(f"Added card: %s, Type: %s", card_data.path, card_data.type)
@@ -126,4 +127,3 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def on_configure_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()
         # TODO
-
