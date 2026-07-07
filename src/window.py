@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
+import threading
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
@@ -60,6 +61,8 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             action = Gio.SimpleAction.new(name, None)
             action.connect("activate", handler)
             self.add_action(action)
+
+        self._update_launch_action()
 
     # file open signal handlers
 
@@ -113,16 +116,39 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def on_card_selected(self, _view, card_data):
         if card_data is None:
             self.card_action_bar.set_revealed(False)
+            self._update_launch_action()
             return
         self.card_selected_label.set_text(card_data.title)
         self.card_action_bar.set_revealed(True)
+        self._update_launch_action()
 
     def on_launch_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()
-        if card_data is None:
+        if card_data is None or card_data.running:
             return
-        Launcher.launch(card_data)
-        # TODO
+
+        try:
+            process = Launcher.launch(card_data)
+        except Exception as e:
+            logger.error("Launch failed for %s: %s", card_data.path, e)
+            return
+
+        card_data.running = True
+        self._update_launch_action()
+
+        def _wait():
+            process.wait()
+            card_data.running = False
+            logger.info("App exited: %s", card_data.path)
+            GLib.idle_add(self._update_launch_action)
+
+        threading.Thread(target=_wait, daemon=True).start()
+
+    def _update_launch_action(self) -> None:
+        """Enable the launch button only for a selected not running card"""
+        selected = self.card_view.get_selected_card()
+        if selected is not None:
+            self.lookup_action("launch-card").set_enabled(not selected.running)
 
     def on_configure_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()

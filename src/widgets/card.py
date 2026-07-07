@@ -37,6 +37,7 @@ class ZLibCardData:
             Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "wineprefix"
         )
     )
+    running: bool = False
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")
