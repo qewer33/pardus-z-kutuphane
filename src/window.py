@@ -64,6 +64,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             ("launch-card", self.on_launch_card),
             ("configure-card", self.on_configure_card),
             ("show-log-card", self.on_show_log_card),
+            ("remove-card", self.on_remove_card),
         ):
             action = Gio.SimpleAction.new(name, None)
             action.connect("activate", handler)
@@ -197,3 +198,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def on_configure_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()
         # TODO
+
+    def on_remove_card(self, _action, _param):
+        self.card_view.remove_selected_card()
+        self.save_library()
+        if not self.card_view.cards_data_list:
+            self.card_stack.set_visible_child_name("empty")
