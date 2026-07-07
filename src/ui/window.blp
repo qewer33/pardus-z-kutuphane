@@ -48,15 +48,11 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       }
 
       [end]
-      Gtk.Button {
-        label: _("Yapılandır");
-        action-name: "win.configure-card";
-      }
-
-      [end]
-      Gtk.Button {
-        label: _("Günce");
-        action-name: "win.show-log-card";
+      Gtk.MenuButton {
+        icon-name: "view-more-symbolic";
+        tooltip-text: _("Diğer Eylemler");
+        menu-model: card_actions_menu;
+        direction: up;
       }
     }
 
@@ -81,6 +77,20 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       }
     };
   };
+}
+
+menu card_actions_menu {
+  section {
+    item {
+      label: _("Yapılandır");
+      action: "win.configure-card";
+    }
+
+    item {
+      label: _("Günce");
+      action: "win.show-log-card";
+    }
+  }
 }
 
 menu primary_menu {

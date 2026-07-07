@@ -17,8 +17,10 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import json
 import os
 import threading
+from pathlib import Path
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
@@ -27,6 +29,10 @@ from .util.logger import get_logger
 from .widgets import LogWindow, ZLibCardData
 
 logger = get_logger(os.path.basename(__file__))
+
+LIBRARY_FILE = (
+    Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "library.json"
+)
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
@@ -64,6 +70,27 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             self.add_action(action)
 
         self._update_launch_action()
+
+        self.load_library()
+
+    # library persistence
+
+    def load_library(self) -> None:
+        if not LIBRARY_FILE.exists():
+            return
+        for entry in json.loads(LIBRARY_FILE.read_text()):
+            self.add_card(ZLibCardData.from_dict(entry))
+        # clear selection
+        GLib.idle_add(self._clear_card_selection)
+
+    def _clear_card_selection(self) -> int:
+        self.card_view.unselect_all()
+        return GLib.SOURCE_REMOVE
+
+    def save_library(self) -> None:
+        LIBRARY_FILE.parent.mkdir(parents=True, exist_ok=True)
+        cards = self.card_view.cards_data_list
+        LIBRARY_FILE.write_text(json.dumps([card.to_dict() for card in cards]))
 
     # file open signal handlers
 
@@ -113,6 +140,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def add_card(self, card_data: ZLibCardData) -> None:
         self.card_view.add_card(card_data)
         self.card_stack.set_visible_child_name("cards")
+        self.save_library()
 
     def on_card_selected(self, _view, card_data):
         if card_data is None:

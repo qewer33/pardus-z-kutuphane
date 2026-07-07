@@ -22,6 +22,8 @@ from pathlib import Path
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
+from ..backend.typedetector import ExecutableType
+
 
 @dataclass
 class ZLibCardData:
@@ -30,7 +32,7 @@ class ZLibCardData:
     title: str
     icon: str
     path: str
-    type: str
+    type: ExecutableType
     arguments: list[str] | None = None
     wine_prefix: Path = field(
         default_factory=lambda: (
@@ -39,6 +41,28 @@ class ZLibCardData:
     )
     running: bool = False
     log_buffer: Gtk.TextBuffer = field(default_factory=Gtk.TextBuffer)
+
+    def to_dict(self) -> dict:
+        """Serialize the persistent fields (skips transient runtime state)"""
+        return {
+            "title": self.title,
+            "icon": self.icon,
+            "path": self.path,
+            "type": self.type.value,
+            "arguments": self.arguments,
+            "wine_prefix": str(self.wine_prefix),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ZLibCardData":
+        return cls(
+            title=data["title"],
+            icon=data["icon"],
+            path=data["path"],
+            type=ExecutableType(data["type"]),
+            arguments=data["arguments"],
+            wine_prefix=Path(data["wine_prefix"]),
+        )
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card.ui")
