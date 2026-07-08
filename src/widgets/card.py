@@ -76,6 +76,7 @@ class ZLibCard(Adw.Bin):
 
     card_icon = Gtk.Template.Child()
     card_title = Gtk.Template.Child()
+    card_publisher = Gtk.Template.Child()
 
     def __init__(self, data: ZLibCardData, **kwargs):
         super().__init__(**kwargs)
@@ -83,3 +84,7 @@ class ZLibCard(Adw.Bin):
         self.data = data
         self.card_title.set_text(data.title)
         self.card_icon.set_from_icon_name(data.icon)
+        if data.publisher:
+            self.card_publisher.set_text(data.publisher)
+        else:
+            self.card_publisher.set_visible(False)

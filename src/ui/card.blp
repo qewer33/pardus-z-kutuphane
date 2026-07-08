@@ -40,13 +40,31 @@ template $ZLibCard: Adw.Bin {
       max-width-chars: 15;
       ellipsize: end;
       valign: end;
-      margin-bottom: 12;
+      margin-top: 12;
       margin-start: 12;
       margin-end: 12;
 
       styles [
         "heading",
         "body",
+      ]
+    }
+
+    Label card_publisher {
+      justify: center;
+      wrap: true;
+      wrap-mode: word_char;
+      max-width-chars: 15;
+      ellipsize: end;
+      valign: start;
+      sensitive: false;
+      margin-bottom: 12;
+      margin-start: 12;
+      margin-end: 12;
+
+      styles [
+        "caption",
+        "dim-label",
       ]
     }
   }
