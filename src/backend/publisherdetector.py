@@ -48,7 +48,7 @@ class PublisherDetector:
         "mileniyum": "Mileniyum Yayınları",
         "cap": "Çap Yayınları",
         "apotemi": "Apotemi Yayınları",
-        "3 4 5": "345 Yayınları",
+        "345": "345 Yayınları",
     }
 
     @classmethod
