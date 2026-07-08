@@ -1,51 +1,69 @@
 import re
 from pathlib import Path
 
-_TURKISH_TABLE = str.maketrans({
-    'ı': 'i', 'İ': 'i', 'I': 'i',
-    'ş': 's', 'Ş': 's',
-    'ç': 'c', 'Ç': 'c',
-    'ö': 'o', 'Ö': 'o',
-    'ü': 'u', 'Ü': 'u',
-    'ğ': 'g', 'Ğ': 'g',
-})
 
-def _normalize(text: str) -> str:
-    return text.translate(_TURKISH_TABLE).lower()
+class Normalizer:
+    # uppercase and lowercase Turkish chars
+    UC, LC = "A-ZÇŞİĞÜÖ", "a-zçşığüö"
 
-_UC = 'A-ZÇŞİĞÜÖ'
-_LC = 'a-zçşığüö'
+    # fold Turkish letters to ASCII so keys can be written plainly
+    TURKISH = str.maketrans("ıİIşŞçÇöÖüÜğĞ", "iiissccoouugg")
 
-# Split at lowercase →  uppercase (e.g. "Hiz"|"Yayinlari")
-_LOWER_UPPER = re.compile(fr'(?<=[{_LC}])(?=[{_UC}])')
-# Split at uppercase →  uppercase+lowercase (e.g. "FDD"|"Yayinlari")
-_UPPER_UPPER_LOWER = re.compile(fr'(?<=[{_UC}])(?=[{_UC}][{_LC}])')
+    # a "word" is an acronym, a capitalized/lowercase word, or a number
+    # splits both separators and camelCase
+    WORD = re.compile(rf"[{UC}]+(?![{LC}])|[{UC}]?[{LC}]+|[0-9]+")
 
+    @staticmethod
+    def normalize(text: str) -> str:
+        """Normalize a Turkish word to plain ASCII"""
+        return text.translate(Normalizer.TURKISH).lower()
 
-def _split_into_words(text: str) -> list[str]:
-    text = _LOWER_UPPER.sub('\x00', text)
-    text = _UPPER_UPPER_LOWER.sub('\x00', text)
-    return [p for p in text.split('\x00') if p]
+    @staticmethod
+    def words(text: str) -> list[str]:
+        """Split text into an ordered list of normalized words"""
+        return [Normalizer.normalize(word) for word in Normalizer.WORD.findall(text)]
 
 
 class PublisherDetector:
-    _TOKENS: frozenset[str] = frozenset({
-        "hiz", "isler", "ankara", "palme", "esen", "zafer",
-        "limit", "sinav", "kida", "tudem", "fdd", "lider",
-        "murat", "okyanus", "paraf", "puan", "zirve",
-        "bilgi", "mileniyum", "cap", "apotemi",
-    })
+    # normalized token to proper publisher display name
+    _PUBLISHERS: dict[str, str] = {
+        "hiz": "Hız Yayınları",
+        "isler": "İşler Yayınları",
+        "ankara": "Ankara Yayıncılık",
+        "palme": "Palme Yayınevi",
+        "esen": "Esen Yayınları",
+        "zafer": "Zafer Yayınları",
+        "limit": "Limit Yayınları",
+        "sinav": "Sınav Yayınları",
+        "kida": "Kida Yayınları",
+        "tudem": "Tudem Yayınları",
+        "fdd": "FDD Yayınları",
+        "lider": "Lider Yayınları",
+        "murat": "Murat Yayınları",
+        "okyanus": "Okyanus Yayınları",
+        "paraf": "Paraf Yayınları",
+        "puan": "Puan Yayınları",
+        "zirve": "Zirve Yayınları",
+        "bilgi sarmal": "Bilgi Sarmal Yayınları",
+        "mileniyum": "Mileniyum Yayınları",
+        "cap": "Çap Yayınları",
+        "apotemi": "Apotemi Yayınları",
+        "3 4 5": "345 Yayınları",
+    }
 
     @classmethod
     def detect(cls, path: str | Path) -> str | None:
         stem = Path(path).stem
-        tokens = re.split(r"[ _-]+", stem)
-        for token in tokens:
-            if not token:
-                continue
-            parts = _split_into_words(token)
-            for part in parts:
-                normalized = _normalize(part)
-                if normalized in cls._TOKENS:
-                    return normalized
+
+        parts = Normalizer.words(stem)
+
+        # match publisher keys (one or more tokens)
+        # trying the longest keys first
+        keys = sorted(cls._PUBLISHERS, key=lambda k: len(k.split()), reverse=True)
+        for key in keys:
+            key_tokens = key.split()
+            span = len(key_tokens)
+            for i in range(len(parts) - span + 1):
+                if parts[i : i + span] == key_tokens:
+                    return cls._PUBLISHERS[key]
         return None
