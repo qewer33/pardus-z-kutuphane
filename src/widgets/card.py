@@ -33,6 +33,7 @@ class ZLibCardData:
     icon: str
     path: str
     type: ExecutableType
+    publisher: str | None = None
     arguments: list[str] | None = None
     wine_prefix: Path = field(
         default_factory=lambda: (
@@ -49,6 +50,7 @@ class ZLibCardData:
             "icon": self.icon,
             "path": self.path,
             "type": self.type.value,
+            "publisher": self.publisher,
             "arguments": self.arguments,
             "wine_prefix": str(self.wine_prefix),
         }
@@ -60,6 +62,7 @@ class ZLibCardData:
             icon=data["icon"],
             path=data["path"],
             type=ExecutableType(data["type"]),
+            publisher=data.get("publisher"),
             arguments=data["arguments"],
             wine_prefix=Path(data["wine_prefix"]),
         )

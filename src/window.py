@@ -24,7 +24,7 @@ from pathlib import Path
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
-from .backend import Launcher, TypeDetector
+from .backend import Launcher, PublisherDetector, TypeDetector
 from .util.logger import get_logger
 from .widgets import LogWindow, ZLibCardData
 
@@ -118,23 +118,25 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         path = file.get_path()
         type = TypeDetector.get_executable_type(path)
+        publisher = PublisherDetector.detect(path)
         card_data = ZLibCardData(
-            file.get_basename(), "dialog-question-symbolic", path, type
+            file.get_basename(), "dialog-question-symbolic", path, type, publisher
         )
         self.add_card(card_data)
-        logger.info(f"Added card: %s, Type: %s", card_data.path, card_data.type)
+        logger.info(f"Added card: %s, Type: %s, Publisher: %s", card_data.path, card_data.type, card_data.publisher)
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if isinstance(file_list, Gdk.FileList):
             for file in file_list:
                 path = file.get_path()
                 type = TypeDetector.get_executable_type(path)
+                publisher = PublisherDetector.detect(path)
                 card_data = ZLibCardData(
-                    file.get_basename(), "dialog-question-symbolic", path, type
+                    file.get_basename(), "dialog-question-symbolic", path, type, publisher
                 )
 
                 self.add_card(card_data)
-                logger.info(f"Added card: %s, Type: %s", card_data.path, card_data.type)
+                logger.info(f"Added card: %s, Type: %s, Publisher: %s", card_data.path, card_data.type, card_data.publisher)
 
     # card view signal handlers
 
