@@ -6,6 +6,7 @@
     <file preprocess="xml-stripblanks">card.ui</file>
     <file preprocess="xml-stripblanks">add_book_dialog.ui</file>
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
+    <file>resources/book.png</file>
   </gresource>
 </gresources>
 

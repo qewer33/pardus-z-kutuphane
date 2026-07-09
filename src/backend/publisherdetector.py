@@ -1,5 +1,9 @@
+import json
 import re
+import threading
 from pathlib import Path
+
+from gi.repository import GLib
 
 
 class Normalizer:
@@ -73,3 +77,73 @@ class PublisherDetector:
                 if parts[i : i + span] == key_tokens:
                     return cls._PUBLISHERS[key]
         return None
+
+
+def _load_publisher_logos() -> dict[str, str]:
+    # installed:  {pkgdatadir}/publisher_icons.json
+    # dev source: {project_root}/data/publisher_icons.json
+    module_dir = Path(__file__).resolve().parent
+    pkgdatadir = module_dir.parent.parent
+    candidates = [
+        pkgdatadir / "publisher_icons.json",
+        pkgdatadir / "data" / "publisher_icons.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            return json.loads(path.read_text())
+    return {}
+
+
+_PUBLISHER_LOGOS = _load_publisher_logos()
+
+
+class PublisherIconCache:
+    _CACHE_DIR = Path(GLib.get_user_cache_dir()) / "tr.org.pardus.zkutuphane" / "publisher_icons"
+
+    @classmethod
+    def path_for(cls, publisher: str | None) -> str | None:
+        if publisher is None:
+            return None
+        url = _PUBLISHER_LOGOS.get(publisher)
+        if url is None:
+            return None
+        name = cls._url_to_name(url)
+        path = cls._CACHE_DIR / name
+        if path.exists():
+            return str(path)
+        return None
+
+    @classmethod
+    def _url_to_name(cls, url: str) -> str:
+        return Path(url.split("//")[-1].split("/")[0]).stem + ".png"
+
+    @classmethod
+    def fetch_async(cls, publisher: str, on_ready: callable) -> None:
+        url = _PUBLISHER_LOGOS.get(publisher)
+        if url is None:
+            return
+
+        def _fetch():
+            import os
+            from ..util.logger import get_logger
+            _logger = get_logger(os.path.basename(__file__))
+
+            cls._CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            name = cls._url_to_name(url)
+            path = cls._CACHE_DIR / name
+            if path.exists():
+                GLib.idle_add(on_ready, str(path))
+                return
+            try:
+                from urllib.request import urlretrieve
+
+                urlretrieve(url, str(path))
+                if path.exists() and path.stat().st_size > 512:
+                    GLib.idle_add(on_ready, str(path))
+                else:
+                    path.unlink(missing_ok=True)
+                    _logger.error("Publisher icon too small or missing: %s (%s)", publisher, url)
+            except Exception as e:
+                _logger.error("Failed to fetch publisher icon for %s (%s): %s", publisher, url, e)
+
+        threading.Thread(target=_fetch, daemon=True).start()

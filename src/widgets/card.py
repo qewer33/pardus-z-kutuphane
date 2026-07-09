@@ -1,27 +1,9 @@
-# card.py
-#
-# Copyright 2026 qewer
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
+from ..backend.publisherdetector import PublisherIconCache
 from ..backend.typedetector import ExecutableType
 
 UNKNOWN_PUBLISHER = "Bilinmeyen Yayıncı"
@@ -76,7 +58,8 @@ class ZLibCard(Adw.Bin):
 
     __gtype_name__ = "ZLibCard"
 
-    card_icon = Gtk.Template.Child()
+    card_icon_base = Gtk.Template.Child()
+    card_icon_overlay = Gtk.Template.Child()
     card_title = Gtk.Template.Child()
     card_publisher = Gtk.Template.Child()
 
@@ -89,5 +72,20 @@ class ZLibCard(Adw.Bin):
     def refresh(self) -> None:
         """Sync the widgets with the current card data."""
         self.card_title.set_text(self.data.title)
-        self.card_icon.set_from_icon_name(self.data.icon)
         self.card_publisher.set_text(self.data.publisher or UNKNOWN_PUBLISHER)
+
+        pub_icon_path = PublisherIconCache.path_for(self.data.publisher)
+        if pub_icon_path:
+            self.card_icon_overlay.set_from_file(pub_icon_path)
+            self.card_icon_overlay.set_visible(True)
+        elif self.data.publisher is None:
+            self.card_icon_overlay.set_from_icon_name("dialog-question-symbolic")
+            self.card_icon_overlay.set_visible(True)
+        else:
+            self.card_icon_overlay.set_visible(False)
+            PublisherIconCache.fetch_async(self.data.publisher, self._on_publisher_icon_ready)
+
+    def _on_publisher_icon_ready(self, path: str) -> None:
+        if self.data.publisher:
+            self.card_icon_overlay.set_from_file(path)
+            self.card_icon_overlay.set_visible(True)

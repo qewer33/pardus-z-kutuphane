@@ -1,25 +1,6 @@
-# add_book_dialog.py
-#
-# Copyright 2026 qewer
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-
 from gi.repository import Adw, Gtk
 
-from ..backend.publisherdetector import PublisherDetector
+from ..backend.publisherdetector import PublisherDetector, PublisherIconCache
 from ..backend.typedetector import ExecutableType
 from .card import UNKNOWN_PUBLISHER, ZLibCardData
 
@@ -46,7 +27,8 @@ class ZLibAddBookDialog(Adw.Dialog):
 
     __gtype_name__ = "ZLibAddBookDialog"
 
-    book_icon = Gtk.Template.Child()
+    book_icon_base = Gtk.Template.Child()
+    book_icon_overlay = Gtk.Template.Child()
     title_row = Gtk.Template.Child()
     publisher_row = Gtk.Template.Child()
     type_row = Gtk.Template.Child()
@@ -69,7 +51,18 @@ class ZLibAddBookDialog(Adw.Dialog):
 
         self.set_title(title)
         self.add_button.set_label(confirm_label)
-        self.book_icon.set_from_icon_name(card_data.icon)
+
+        pub_icon_path = PublisherIconCache.path_for(card_data.publisher)
+        if pub_icon_path:
+            self.book_icon_overlay.set_from_file(pub_icon_path)
+            self.book_icon_overlay.set_visible(True)
+        elif card_data.publisher is None:
+            self.book_icon_overlay.set_from_icon_name("dialog-question-symbolic")
+            self.book_icon_overlay.set_visible(True)
+        else:
+            self.book_icon_overlay.set_visible(False)
+            PublisherIconCache.fetch_async(card_data.publisher, self._on_publisher_icon_ready)
+
         self.title_row.set_text(card_data.title)
 
         # publisher dropdown
@@ -88,6 +81,11 @@ class ZLibAddBookDialog(Adw.Dialog):
 
         self.cancel_button.connect("clicked", lambda _button: self.close())
         self.add_button.connect("clicked", self._on_add)
+
+    def _on_publisher_icon_ready(self, path: str) -> None:
+        if self.card_data.publisher:
+            self.book_icon_overlay.set_from_file(path)
+            self.book_icon_overlay.set_visible(True)
 
     def _on_add(self, _button):
         card_data = self.card_data

@@ -14,21 +14,17 @@ template $ZLibCard: Adw.Bin {
     valign: fill;
     vexpand: true;
 
-    AspectFrame {
-      ratio: 1.0;
-      obey-child: false;
-      halign: center;
-      valign: start;
-      vexpand: true;
-      width-request: 64;
-      height-request: 64;
+    Overlay {
+      Image card_icon_base {
+        resource: "/tr/org/pardus/zkutuphane/resources/book.png";
+        pixel-size: 200;
+      }
 
-      Image card_icon {
-        overflow: hidden;
-        valign: fill;
-        halign: fill;
-        icon-name: "image-missing";
-        icon-size: large;
+      [overlay]
+      Image card_icon_overlay {
+        halign: center;
+        valign: center;
+        pixel-size: 72;
       }
     }
 

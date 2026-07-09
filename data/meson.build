@@ -1,3 +1,5 @@
+pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
+
 desktop_file = i18n.merge_file(
         input: 'tr.org.pardus.zkutuphane.desktop.in',
        output: 'tr.org.pardus.zkutuphane.desktop',
@@ -41,6 +43,10 @@ configure_file(
   output: 'tr.org.pardus.zkutuphane.service',
   configuration: service_conf,
   install_dir: get_option('datadir') / 'dbus-1' / 'services'
+)
+
+install_data('publisher_icons.json',
+  install_dir: pkgdatadir
 )
 
 subdir('icons')

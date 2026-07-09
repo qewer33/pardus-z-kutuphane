@@ -34,9 +34,18 @@ template $ZLibAddBookDialog: Adw.Dialog {
       margin-start: 18;
       margin-end: 18;
 
-      Gtk.Image book_icon {
-        pixel-size: 64;
-        icon-name: "dialog-question-symbolic";
+      Overlay {
+        Gtk.Image book_icon_base {
+          resource: "/tr/org/pardus/zkutuphane/resources/book.png";
+          pixel-size: 200;
+        }
+
+        [overlay]
+        Gtk.Image book_icon_overlay {
+          halign: center;
+          valign: center;
+          pixel-size: 72;
+        }
       }
 
       Adw.PreferencesGroup {
