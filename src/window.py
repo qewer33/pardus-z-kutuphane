@@ -31,6 +31,8 @@ from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData
 
 logger = get_logger(os.path.basename(__file__))
 
+SCHEMA_ID = "tr.org.pardus.zkutuphane"
+
 LIBRARY_FILE = (
     Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "library.json"
 )
@@ -49,6 +51,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # remember window size across sessions
+        self._bind_window_size()
 
         # setup drag & drop
         drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
@@ -73,6 +78,18 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         self._update_launch_action()
 
         self.load_library()
+
+    def _bind_window_size(self) -> None:
+        source = Gio.SettingsSchemaSource.get_default()
+        if source is None or source.lookup(SCHEMA_ID, True) is None:
+            logger.warning(
+                "GSettings schema %s not found; window size won't persist", SCHEMA_ID
+            )
+            return
+        settings = Gio.Settings(schema_id=SCHEMA_ID)
+        settings.bind("width", self, "default-width", Gio.SettingsBindFlags.DEFAULT)
+        settings.bind("height", self, "default-height", Gio.SettingsBindFlags.DEFAULT)
+        settings.bind("maximized", self, "maximized", Gio.SettingsBindFlags.DEFAULT)
 
     # library persistence
 
@@ -190,8 +207,6 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             self._update_launch_action()
             return
         self.card_selected_label.set_text(card_data.title)
-        # force a full repaint: the raised bottom bar's shadow region can leave
-        # ghost pixels of the previous label otherwise
         self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)
         self._update_launch_action()

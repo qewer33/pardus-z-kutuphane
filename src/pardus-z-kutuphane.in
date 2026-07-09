@@ -31,6 +31,14 @@ localedir = '@localedir@'
 
 sys.path.insert(1, pkgdatadir)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+# make our GSettings schema discoverable when installed under a custom prefix
+schema_dir = os.path.normpath(os.path.join(pkgdatadir, '..', 'glib-2.0', 'schemas'))
+existing = os.environ.get('GSETTINGS_SCHEMA_DIR', '')
+os.environ['GSETTINGS_SCHEMA_DIR'] = (
+    schema_dir + os.pathsep + existing if existing else schema_dir
+)
+
 locale.bindtextdomain('pardus-z-kutuphane', localedir)
 locale.textdomain('pardus-z-kutuphane')
 gettext.bindtextdomain('pardus-z-kutuphane', localedir)

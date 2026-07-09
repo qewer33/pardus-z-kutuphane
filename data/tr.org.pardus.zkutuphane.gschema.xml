@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="pardus-z-kutuphane">
 	<schema id="tr.org.pardus.zkutuphane" path="/tr/org/pardus/zkutuphane/">
+		<key name="width" type="i">
+			<default>900</default>
+			<summary>Window width</summary>
+		</key>
+		<key name="height" type="i">
+			<default>640</default>
+			<summary>Window height</summary>
+		</key>
+		<key name="maximized" type="b">
+			<default>false</default>
+			<summary>Window maximized state</summary>
+		</key>
 	</schema>
 </schemalist>
