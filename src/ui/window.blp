@@ -13,6 +13,10 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
     Adw.HeaderBar {
       [start]
       Gtk.MenuButton add_button {
+        styles [
+          "flat",
+        ]
+
         tooltip-text: _("Ekle");
         menu-model: add_menu;
 
@@ -26,6 +30,7 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
           Gtk.Image {
             icon-name: "list-add-symbolic";
           }
+
           Gtk.Label {
             label: _("Ekle");
           }
@@ -112,6 +117,7 @@ menu add_menu {
       label: _("Dosya Ekle");
       action: "win.open-file";
     }
+
     item {
       label: _("Bağlantı Ekle");
       action: "win.add-link";

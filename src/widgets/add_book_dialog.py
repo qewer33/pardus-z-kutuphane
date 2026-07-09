@@ -2,7 +2,7 @@ from gi.repository import Adw, Gtk
 
 from ..backend.publisherdetector import PublisherDetector, PublisherIconCache
 from ..backend.typedetector import ExecutableType
-from .card import UNKNOWN_PUBLISHER, ZLibCardData
+from .card import UNKNOWN_PUBLISHER, ZLibCardData, set_image_from_file
 
 # launch categories
 _FILE_CATEGORIES = [
@@ -54,7 +54,7 @@ class ZLibAddBookDialog(Adw.Dialog):
 
         pub_icon_path = PublisherIconCache.path_for(card_data.publisher)
         if pub_icon_path:
-            self.book_icon_overlay.set_from_file(pub_icon_path)
+            set_image_from_file(self.book_icon_overlay, pub_icon_path)
             self.book_icon_overlay.set_visible(True)
         elif card_data.publisher is None:
             self.book_icon_overlay.set_from_icon_name("dialog-question-symbolic")
@@ -84,7 +84,7 @@ class ZLibAddBookDialog(Adw.Dialog):
 
     def _on_publisher_icon_ready(self, path: str) -> None:
         if self.card_data.publisher:
-            self.book_icon_overlay.set_from_file(path)
+            set_image_from_file(self.book_icon_overlay, path)
             self.book_icon_overlay.set_visible(True)
 
     def _on_add(self, _button):

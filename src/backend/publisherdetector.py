@@ -52,7 +52,7 @@ class PublisherDetector:
         "mileniyum": "Mileniyum Yayınları",
         "cap": "Çap Yayınları",
         "apotemi": "Apotemi Yayınları",
-        "345": "345 Yayınları",
+        "ucdortbes": "ÜçDörtBeş Yayınları",
         "aydin": "Aydın Yayınları",
     }
 
@@ -96,9 +96,16 @@ def _load_publisher_logos() -> dict[str, str]:
 
 _PUBLISHER_LOGOS = _load_publisher_logos()
 
+_USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+)
+
 
 class PublisherIconCache:
-    _CACHE_DIR = Path(GLib.get_user_cache_dir()) / "tr.org.pardus.zkutuphane" / "publisher_icons"
+    _CACHE_DIR = (
+        Path(GLib.get_user_cache_dir()) / "tr.org.pardus.zkutuphane" / "publisher_icons"
+    )
 
     @classmethod
     def path_for(cls, publisher: str | None) -> str | None:
@@ -125,7 +132,9 @@ class PublisherIconCache:
 
         def _fetch():
             import os
+
             from ..util.logger import get_logger
+
             _logger = get_logger(os.path.basename(__file__))
 
             cls._CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -135,15 +144,28 @@ class PublisherIconCache:
                 GLib.idle_add(on_ready, str(path))
                 return
             try:
-                from urllib.request import urlretrieve
+                from urllib.parse import quote
+                from urllib.request import Request, urlopen
 
-                urlretrieve(url, str(path))
+                # percent-encode non-ASCII path chars, and send a browser
+                # User-Agent so servers that 403 the default urllib agent serve
+                # the image
+                safe_url = quote(url, safe=":/?&=#%@+,;")
+                request = Request(safe_url, headers={"User-Agent": _USER_AGENT})
+                with urlopen(request, timeout=15) as response:
+                    path.write_bytes(response.read())
+
                 if path.exists() and path.stat().st_size > 512:
                     GLib.idle_add(on_ready, str(path))
                 else:
                     path.unlink(missing_ok=True)
-                    _logger.error("Publisher icon too small or missing: %s (%s)", publisher, url)
+                    _logger.error(
+                        "Publisher icon too small or missing: %s (%s)", publisher, url
+                    )
             except Exception as e:
-                _logger.error("Failed to fetch publisher icon for %s (%s): %s", publisher, url, e)
+                path.unlink(missing_ok=True)
+                _logger.error(
+                    "Failed to fetch publisher icon for %s (%s): %s", publisher, url, e
+                )
 
         threading.Thread(target=_fetch, daemon=True).start()

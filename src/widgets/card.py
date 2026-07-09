@@ -1,12 +1,20 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from gi.repository import Adw, Gio, GLib, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from ..backend.publisherdetector import PublisherIconCache
 from ..backend.typedetector import ExecutableType
 
 UNKNOWN_PUBLISHER = "Bilinmeyen Yayıncı"
+
+
+def set_image_from_file(image: Gtk.Image, path: str) -> None:
+    """Load a file into a Gtk.Image via GdkTexture"""
+    try:
+        image.set_from_paintable(Gdk.Texture.new_from_filename(path))
+    except GLib.Error:
+        image.set_visible(False)
 
 
 @dataclass
@@ -28,7 +36,7 @@ class ZLibCardData:
     log_buffer: Gtk.TextBuffer = field(default_factory=Gtk.TextBuffer)
 
     def to_dict(self) -> dict:
-        """Serialize the persistent fields (skips transient runtime state)"""
+        """Serialize the persistent fields"""
         return {
             "title": self.title,
             "icon": self.icon,
@@ -76,16 +84,18 @@ class ZLibCard(Adw.Bin):
 
         pub_icon_path = PublisherIconCache.path_for(self.data.publisher)
         if pub_icon_path:
-            self.card_icon_overlay.set_from_file(pub_icon_path)
+            set_image_from_file(self.card_icon_overlay, pub_icon_path)
             self.card_icon_overlay.set_visible(True)
         elif self.data.publisher is None:
             self.card_icon_overlay.set_from_icon_name("dialog-question-symbolic")
             self.card_icon_overlay.set_visible(True)
         else:
             self.card_icon_overlay.set_visible(False)
-            PublisherIconCache.fetch_async(self.data.publisher, self._on_publisher_icon_ready)
+            PublisherIconCache.fetch_async(
+                self.data.publisher, self._on_publisher_icon_ready
+            )
 
     def _on_publisher_icon_ready(self, path: str) -> None:
         if self.data.publisher:
-            self.card_icon_overlay.set_from_file(path)
+            set_image_from_file(self.card_icon_overlay, path)
             self.card_icon_overlay.set_visible(True)
