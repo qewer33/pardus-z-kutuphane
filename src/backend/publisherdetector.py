@@ -49,6 +49,7 @@ class PublisherDetector:
         "cap": "Çap Yayınları",
         "apotemi": "Apotemi Yayınları",
         "345": "345 Yayınları",
+        "aydin", "Aydın Yayınları"
     }
 
     @classmethod

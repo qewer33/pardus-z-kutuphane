@@ -120,6 +120,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                         icon="web-browser-symbolic",
                         path=url,
                         type=ExecutableType.WEBBOOK,
+                        publisher=PublisherDetector.detect(url),
                     )
                     self._show_add_book_dialog(card_data)
             dialog.destroy()
