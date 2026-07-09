@@ -253,7 +253,10 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         if card_data is None:
             return
         dialog = ZLibAddBookDialog(
-            card_data, self._on_card_configured, confirm_label="Tamam"
+            card_data,
+            self._on_card_configured,
+            title="Kitabı Yapılandır",
+            confirm_label="Tamam",
         )
         dialog.present(self)
 

@@ -53,13 +53,21 @@ class ZLibAddBookDialog(Adw.Dialog):
     cancel_button = Gtk.Template.Child()
     add_button = Gtk.Template.Child()
 
-    def __init__(self, card_data: ZLibCardData, on_confirm, confirm_label="Ekle", **kwargs):
+    def __init__(
+        self,
+        card_data: ZLibCardData,
+        on_confirm,
+        title="Kitap Ekle",
+        confirm_label="Ekle",
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
         self.card_data = card_data
         self.on_confirm = on_confirm
         self.is_web = card_data.type == ExecutableType.WEBBOOK
 
+        self.set_title(title)
         self.add_button.set_label(confirm_label)
         self.book_icon.set_from_icon_name(card_data.icon)
         self.title_row.set_text(card_data.title)
