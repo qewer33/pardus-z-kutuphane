@@ -1,0 +1,57 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $ZLibAddBookDialog: Adw.Dialog {
+  title: _("Kitap Ekle");
+  content-width: 420;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-start-title-buttons: false;
+      show-end-title-buttons: false;
+
+      [start]
+      Gtk.Button cancel_button {
+        label: _("İptal");
+      }
+
+      [end]
+      Gtk.Button add_button {
+        label: _("Ekle");
+
+        styles [
+          "suggested-action",
+        ]
+      }
+    }
+
+    content: Gtk.Box {
+      orientation: vertical;
+      spacing: 18;
+      margin-top: 12;
+      margin-bottom: 18;
+      margin-start: 18;
+      margin-end: 18;
+
+      Gtk.Image book_icon {
+        pixel-size: 64;
+        icon-name: "dialog-question-symbolic";
+      }
+
+      Adw.PreferencesGroup {
+        Adw.EntryRow title_row {
+          title: _("Başlık");
+        }
+
+        Adw.ComboRow publisher_row {
+          title: _("Yayıncı");
+        }
+
+        Adw.ComboRow type_row {
+          title: _("Tür");
+        }
+      }
+    };
+  };
+}

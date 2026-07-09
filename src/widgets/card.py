@@ -24,6 +24,8 @@ from gi.repository import Adw, Gio, GLib, Gtk
 
 from ..backend.typedetector import ExecutableType
 
+UNKNOWN_PUBLISHER = "Bilinmeyen Yayıncı"
+
 
 @dataclass
 class ZLibCardData:
@@ -82,9 +84,10 @@ class ZLibCard(Adw.Bin):
         super().__init__(**kwargs)
 
         self.data = data
-        self.card_title.set_text(data.title)
-        self.card_icon.set_from_icon_name(data.icon)
-        if data.publisher:
-            self.card_publisher.set_text(data.publisher)
-        else:
-            self.card_publisher.set_visible(False)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Sync the widgets with the current card data."""
+        self.card_title.set_text(self.data.title)
+        self.card_icon.set_from_icon_name(self.data.icon)
+        self.card_publisher.set_text(self.data.publisher or UNKNOWN_PUBLISHER)

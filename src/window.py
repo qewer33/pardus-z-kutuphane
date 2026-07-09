@@ -21,12 +21,13 @@ import json
 import os
 import threading
 from pathlib import Path
+from urllib.parse import urlparse
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from .backend import ExecutableType, Launcher, PublisherDetector, TypeDetector
 from .util.logger import get_logger
-from .widgets import LogWindow, ZLibCardData
+from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData
 
 logger = get_logger(os.path.basename(__file__))
 
@@ -95,7 +96,6 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         cards = self.card_view.cards_data_list
         LIBRARY_FILE.write_text(json.dumps([card.to_dict() for card in cards]))
 
-
     # web book related handlers
     def on_add_link_clicked(self, _button: Gtk.Button):
         dialog = Adw.MessageDialog(
@@ -119,13 +119,12 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                     if not url.startswith(("http://", "https://")):
                         url = "https://" + url
                     card_data = ZLibCardData(
-                        title=url,
+                        title=urlparse(url).netloc or url,
                         icon="web-browser-symbolic",
                         path=url,
                         type=ExecutableType.WEBBOOK,
                     )
-                    self.add_card(card_data)
-                    logger.info("Added webbook card: %s", url)
+                    self._show_add_book_dialog(card_data)
             dialog.destroy()
 
         dialog.connect("response", on_response)
@@ -145,35 +144,40 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         try:
             file = dialog.open_finish(result)
         except GLib.Error as e:
+            # user dismiss
             if e.matches(Gtk.DialogError.quark(), Gtk.DialogError.DISMISSED):
-                # User cancelled the dialog. Don't log errors
                 return
             logger.error("FileDialog error: %s %s %s", e.message, e.domain, e.code)
             return
         if file is None:
             return
 
-        path = file.get_path()
-        type = TypeDetector.get_executable_type(path)
-        publisher = PublisherDetector.detect(path)
-        card_data = ZLibCardData(
-            file.get_basename(), "dialog-question-symbolic", path, type, publisher
-        )
-        self.add_card(card_data)
-        logger.info(f"Added card: %s, Type: %s, Publisher: %s", card_data.path, card_data.type, card_data.publisher)
+        card_data = self._card_from_file(file.get_path())
+        self._show_add_book_dialog(card_data)
 
     def on_file_drop(self, drop_target, file_list, x, y):
-        if isinstance(file_list, Gdk.FileList):
-            for file in file_list:
-                path = file.get_path()
-                type = TypeDetector.get_executable_type(path)
-                publisher = PublisherDetector.detect(path)
-                card_data = ZLibCardData(
-                    file.get_basename(), "dialog-question-symbolic", path, type, publisher
-                )
+        if not isinstance(file_list, Gdk.FileList):
+            return
 
+        files = list(file_list)
+        for file in files:
+            card_data = self._card_from_file(file.get_path())
+            # don't show dialog for multiple files
+            if len(files) == 1:
+                self._show_add_book_dialog(card_data)
+            else:
                 self.add_card(card_data)
-                logger.info(f"Added card: %s, Type: %s, Publisher: %s", card_data.path, card_data.type, card_data.publisher)
+
+    def _card_from_file(self, path: str) -> ZLibCardData:
+        type = TypeDetector.get_executable_type(path)
+        publisher = PublisherDetector.detect(path)
+        return ZLibCardData(
+            Path(path).stem, "dialog-question-symbolic", path, type, publisher
+        )
+
+    def _show_add_book_dialog(self, card_data: ZLibCardData) -> None:
+        dialog = ZLibAddBookDialog(card_data, self.add_card)
+        dialog.present(self)
 
     # card view signal handlers
 
@@ -246,7 +250,17 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
     def on_configure_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()
-        # TODO
+        if card_data is None:
+            return
+        dialog = ZLibAddBookDialog(
+            card_data, self._on_card_configured, confirm_label="Tamam"
+        )
+        dialog.present(self)
+
+    def _on_card_configured(self, card_data: ZLibCardData) -> None:
+        self.card_view.refresh_selected_card()
+        self.card_selected_label.set_text(card_data.title)
+        self.save_library()
 
     def on_remove_card(self, _action, _param):
         self.card_view.remove_selected_card()

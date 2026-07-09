@@ -52,6 +52,11 @@ class PublisherDetector:
     }
 
     @classmethod
+    def names(cls) -> list[str]:
+        """Sorted list of known publisher display names."""
+        return sorted(set(cls._PUBLISHERS.values()))
+
+    @classmethod
     def detect(cls, path: str | Path) -> str | None:
         stem = Path(path).stem
 

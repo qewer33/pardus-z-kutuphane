@@ -51,6 +51,11 @@ class ZLibCardView(Gtk.FlowBox):
             return None
         return children[0].get_child().data
 
+    def refresh_selected_card(self):
+        children = self.get_selected_children()
+        if children:
+            children[0].get_child().refresh()
+
     def remove_selected_card(self):
         children = self.get_selected_children()
         if not children:
