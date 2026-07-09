@@ -24,7 +24,7 @@ from pathlib import Path
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
-from .backend import Launcher, PublisherDetector, TypeDetector
+from .backend import ExecutableType, Launcher, PublisherDetector, TypeDetector
 from .util.logger import get_logger
 from .widgets import LogWindow, ZLibCardData
 
@@ -44,14 +44,16 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_view = Gtk.Template.Child()
     card_stack = Gtk.Template.Child()
     open_folder = Gtk.Template.Child()
+    add_link = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # setup file open and drag & drop actions
+        # setup file open, link add and drag & drop actions
         self.open_folder.connect("clicked", self.on_open_folder_clicked)
+        self.add_link.connect("clicked", self.on_add_link_clicked)
 
         drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
         drop_target.connect("drop", self.on_file_drop)
@@ -93,7 +95,41 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         cards = self.card_view.cards_data_list
         LIBRARY_FILE.write_text(json.dumps([card.to_dict() for card in cards]))
 
-    # file open signal handlers
+
+    # web book related handlers
+    def on_add_link_clicked(self, _button: Gtk.Button):
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading="Web Kitap Bağlantısı Ekle",
+            body="Kitabın internet adresini girin:",
+        )
+        dialog.add_response("cancel", "İptal")
+        dialog.add_response("add", "Ekle")
+        dialog.set_response_appearance("add", Adw.ResponseAppearance.SUGGESTED)
+        dialog.set_default_response("cancel")
+
+        entry = Gtk.Entry()
+        entry.set_placeholder_text("https://")
+        dialog.set_extra_child(entry)
+
+        def on_response(dialog, response):
+            if response == "add":
+                url = entry.get_text().strip()
+                if url:
+                    if not url.startswith(("http://", "https://")):
+                        url = "https://" + url
+                    card_data = ZLibCardData(
+                        title=url,
+                        icon="web-browser-symbolic",
+                        path=url,
+                        type=ExecutableType.WEBBOOK,
+                    )
+                    self.add_card(card_data)
+                    logger.info("Added webbook card: %s", url)
+            dialog.destroy()
+
+        dialog.connect("response", on_response)
+        dialog.present()
 
     def on_open_folder_clicked(self, _button: Gtk.Button):
         try:
@@ -104,6 +140,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             logger.error("FileDialog error: %s %s %s", e.message, e.domain, e.code)
             return
 
+    # file open signal handlers
     def on_folder_chosen(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
         try:
             file = dialog.open_finish(result)

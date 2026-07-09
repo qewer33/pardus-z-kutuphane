@@ -56,6 +56,7 @@ class WineBackend:
 
         prefix.mkdir(parents=True, exist_ok=True)
 
+        # initialize wine
         result = subprocess.run(
             ["wineboot", "-i"],
             env=WineBackend._environment(prefix),

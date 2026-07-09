@@ -1,4 +1,4 @@
-# window.py
+# launcher.py
 #
 # Copyright 2026 qewer
 #
@@ -19,6 +19,7 @@
 
 from .elf import ELFBackend
 from .typedetector import ExecutableType
+from .webbook import WebbookBackend
 from .wine import WineBackend
 
 
@@ -27,7 +28,10 @@ class Launcher:
 
     @staticmethod
     def launch(app):
-        """Main launch method for launching Cards"""
+        """
+        Main launch method for launching Cards
+        Note that all of the backends are compatible with the ZLibCardData class
+        """
 
         if app.type in (
             ExecutableType.ELF,
@@ -44,3 +48,5 @@ class Launcher:
                 arguments=app.arguments,
                 wine_prefix=app.wine_prefix,
             )
+        elif app.type == ExecutableType.WEBBOOK:
+            return WebbookBackend.launch(url=app.path)

@@ -14,6 +14,8 @@ class ExecutableType(Enum):
     PE32 = "pe32"
     PE64 = "pe64"
 
+    WEBBOOK = "webbook"
+
 
 class TypeDetector:
     @staticmethod

@@ -8,7 +8,7 @@ logger = get_logger(os.path.basename(__file__))
 
 
 class ELFError(Exception):
-    """Raised for Wine-related errors"""
+    """Raised for ELF-related errors"""
 
 
 class ELFBackend:
