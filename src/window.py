@@ -200,6 +200,11 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             process = Launcher.launch(card_data)
         except Exception as e:
             logger.error("Launch failed for %s: %s", card_data.path, e)
+            if isinstance(e, FileNotFoundError):
+                body = f"Dosya bulunamadı:\n{card_data.path}"
+            else:
+                body = str(e)
+            self._show_error(f"“{card_data.title}” başlatılamadı", body)
             return
 
         card_data.running = True
@@ -233,6 +238,11 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         selected = self.card_view.get_selected_card()
         if selected is not None:
             self.lookup_action("launch-card").set_enabled(not selected.running)
+
+    def _show_error(self, heading: str, body: str) -> None:
+        dialog = Adw.AlertDialog(heading=heading, body=body)
+        dialog.add_response("ok", "Tamam")
+        dialog.present(self)
 
     def on_configure_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()
