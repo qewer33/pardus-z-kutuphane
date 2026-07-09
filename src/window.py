@@ -44,18 +44,13 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
     card_view = Gtk.Template.Child()
     card_stack = Gtk.Template.Child()
-    open_folder = Gtk.Template.Child()
-    add_link = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # setup file open, link add and drag & drop actions
-        self.open_folder.connect("clicked", self.on_open_folder_clicked)
-        self.add_link.connect("clicked", self.on_add_link_clicked)
-
+        # setup drag & drop
         drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
         drop_target.connect("drop", self.on_file_drop)
         self.add_controller(drop_target)
@@ -68,6 +63,8 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             ("configure-card", self.on_configure_card),
             ("show-log-card", self.on_show_log_card),
             ("remove-card", self.on_remove_card),
+            ("open-file", lambda a, p: self.on_open_folder_clicked(None)),
+            ("add-link", lambda a, p: self.on_add_link_clicked(None)),
         ):
             action = Gio.SimpleAction.new(name, None)
             action.connect("activate", handler)
@@ -123,6 +120,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                         icon="web-browser-symbolic",
                         path=url,
                         type=ExecutableType.WEBBOOK,
+                        publisher=PublisherDetector.detect(url),
                     )
                     self._show_add_book_dialog(card_data)
             dialog.destroy()

@@ -12,13 +12,24 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
     [top]
     Adw.HeaderBar {
       [start]
-      Gtk.Button open_folder {
-        label: _("Dosya Ekle");
-      }
+      Gtk.MenuButton add_button {
+        tooltip-text: _("Ekle");
+        menu-model: add_menu;
 
-      [start]
-      Gtk.Button add_link {
-        label: _("Bağlantı Ekle");
+        child: Gtk.Box {
+          margin-top: 4;
+          margin-bottom: 4;
+          margin-start: 6;
+          margin-end: 6;
+          spacing: 6;
+
+          Gtk.Image {
+            icon-name: "list-add-symbolic";
+          }
+          Gtk.Label {
+            label: _("Ekle");
+          }
+        };
       }
 
       [end]
@@ -93,6 +104,19 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       }
     };
   };
+}
+
+menu add_menu {
+  section {
+    item {
+      label: _("Dosya Ekle");
+      action: "win.open-file";
+    }
+    item {
+      label: _("Bağlantı Ekle");
+      action: "win.add-link";
+    }
+  }
 }
 
 menu card_actions_menu {
