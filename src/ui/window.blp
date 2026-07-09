@@ -7,6 +7,8 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
   default-height: 600;
 
   content: Adw.ToolbarView {
+    bottom-bar-style: raised;
+
     [top]
     Adw.HeaderBar {
       [start]
@@ -38,6 +40,9 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
           "heading",
         ]
 
+        margin-start: 12;
+        margin-top: 6;
+        margin-bottom: 6;
         max-width-chars: 30;
         ellipsize: end;
       }
@@ -46,6 +51,9 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       Gtk.Button {
         label: _("Çalıştır");
         action-name: "win.launch-card";
+        margin-top: 6;
+        margin-bottom: 6;
+        margin-end: 6;
 
         styles [
           "suggested-action",
@@ -58,6 +66,9 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
         tooltip-text: _("Diğer Eylemler");
         menu-model: card_actions_menu;
         direction: up;
+        margin-top: 6;
+        margin-bottom: 6;
+        margin-end: 6;
       }
     }
 

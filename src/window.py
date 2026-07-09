@@ -192,6 +192,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             self._update_launch_action()
             return
         self.card_selected_label.set_text(card_data.title)
+        # force a full repaint: the raised bottom bar's shadow region can leave
+        # ghost pixels of the previous label otherwise
+        self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)
         self._update_launch_action()
 
