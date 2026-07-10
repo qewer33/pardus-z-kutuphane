@@ -52,6 +52,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # guards library auto-save while cards are being loaded from disk
+        self._loading = False
+
         # remember window size across sessions
         self._bind_window_size()
 
@@ -62,6 +65,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         # setup card view actions
         self.card_view.connect("card-selected", self.on_card_selected)
+        self.card_view.connect("library-changed", self.on_library_changed)
 
         for name, handler in (
             ("launch-card", self.on_launch_card),
@@ -96,14 +100,21 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def load_library(self) -> None:
         if not LIBRARY_FILE.exists():
             return
+        # suppress auto-save while populating from disk (nothing changed yet)
+        self._loading = True
         for entry in json.loads(LIBRARY_FILE.read_text()):
             self.add_card(ZLibCardData.from_dict(entry))
+        self._loading = False
         # clear selection
         GLib.idle_add(self._clear_card_selection)
 
     def _clear_card_selection(self) -> int:
         self.card_view.unselect_all()
         return GLib.SOURCE_REMOVE
+
+    def on_library_changed(self, _view) -> None:
+        if not self._loading:
+            self.save_library()
 
     def save_library(self) -> None:
         LIBRARY_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -199,7 +210,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def add_card(self, card_data: ZLibCardData) -> None:
         self.card_view.add_card(card_data)
         self.card_stack.set_visible_child_name("cards")
-        self.save_library()
+        # save happens via the card view's "library-changed" signal
 
     def on_card_selected(self, _view, card_data):
         if card_data is None:
@@ -282,7 +293,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         self.save_library()
 
     def on_remove_card(self, _action, _param):
+        # save happens via the card view's "library-changed" signal
         self.card_view.remove_selected_card()
-        self.save_library()
         if not self.card_view.cards_data_list:
             self.card_stack.set_visible_child_name("empty")

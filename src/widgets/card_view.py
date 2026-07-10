@@ -17,9 +17,19 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import GObject, Gtk
+from gi.repository import Gio, GObject, Gtk
 
 from .card import ZLibCard, ZLibCardData
+
+
+class ZLibCardItem(GObject.Object):
+    """Thin GObject wrapper so ZLibCardData can live in a Gio.ListStore"""
+
+    __gtype_name__ = "ZLibCardItem"
+
+    def __init__(self, data: ZLibCardData):
+        super().__init__()
+        self.data = data
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card_view.ui")
@@ -30,20 +40,30 @@ class ZLibCardView(Gtk.FlowBox):
 
     __gsignals__ = {
         "card-selected": (GObject.SignalFlags.RUN_FIRST, None, (object,)),
+        # emitted whenever cards are added, removed or reordered
+        "library-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.init_template()
 
-        self.cards_data_list: list[ZLibCardData] = []  # main data list
+        # the model is the source of truth; the FlowBox mirrors it
+        self.store = Gio.ListStore.new(ZLibCardItem)
+        self.bind_model(self.store, self._create_card)
+        self.store.connect("items-changed", lambda *_: self.emit("library-changed"))
 
         self.connect("selected-children-changed", self._on_selection_changed)
 
+    @property
+    def cards_data_list(self) -> list[ZLibCardData]:
+        return [self.store.get_item(i).data for i in range(self.store.get_n_items())]
+
+    def _create_card(self, item: ZLibCardItem) -> ZLibCard:
+        return ZLibCard(item.data)
+
     def add_card(self, card_data: ZLibCardData):
-        self.cards_data_list.append(card_data)
-        card = ZLibCard(card_data)
-        self.insert(card, -1)
+        self.store.append(ZLibCardItem(card_data))
 
     def get_selected_card(self):
         children = self.get_selected_children()
@@ -60,10 +80,7 @@ class ZLibCardView(Gtk.FlowBox):
         children = self.get_selected_children()
         if not children:
             return
-        child = children[0]
-        card_data = child.get_child().data
-        self.cards_data_list = [c for c in self.cards_data_list if c is not card_data]
-        self.remove(child)
+        self.store.remove(children[0].get_index())
 
     def _on_selection_changed(self, _flowbox):
         self.emit("card-selected", self.get_selected_card())
