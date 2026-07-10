@@ -64,9 +64,9 @@ template $ZLibAddBookDialog: Adw.Dialog {
         Adw.PreferencesRow {
           Gtk.Box {
             orientation: vertical;
-            margin-start: 12;
-            margin-end: 12;
-            margin-top: 12;
+            margin-start: 2;
+            margin-end: 2;
+            margin-top: 2;
             margin-bottom: 12;
 
             Gtk.Box {
@@ -83,7 +83,7 @@ template $ZLibAddBookDialog: Adw.Dialog {
                 hexpand: true;
               }
 
-              Gtk.Button tag_add_button {
+              Gtk.MenuButton tag_add_button {
                 child: Gtk.Box {
                   spacing: 4;
 
@@ -93,6 +93,38 @@ template $ZLibAddBookDialog: Adw.Dialog {
 
                   Gtk.Label {
                     label: _("Ekle");
+                  }
+                };
+
+                popover: Gtk.Popover tag_add_popover {
+                  position: bottom;
+
+                  Gtk.Box {
+                    orientation: vertical;
+                    spacing: 6;
+                    margin-top: 6;
+                    margin-bottom: 6;
+                    margin-start: 6;
+                    margin-end: 6;
+
+                    Gtk.SearchEntry tag_search_entry {
+                      placeholder-text: _("Etiket Ara...");
+                    }
+
+                    Gtk.ScrolledWindow {
+                      valign: start;
+                      min-content-height: 200;
+                      max-content-height: 300;
+
+                      Gtk.FlowBox tag_search_flowbox {
+                        selection-mode: single;
+                        max-children-per-line: 1;
+                        column-spacing: 4;
+                        row-spacing: 4;
+                        homogeneous: false;
+                        valign: start;
+                      }
+                    }
                   }
                 };
 

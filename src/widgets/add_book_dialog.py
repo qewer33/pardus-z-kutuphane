@@ -40,6 +40,9 @@ class ZLibAddBookDialog(Adw.Dialog):
     add_button = Gtk.Template.Child()
     tag_flowbox = Gtk.Template.Child()
     tag_add_button = Gtk.Template.Child()
+    tag_add_popover = Gtk.Template.Child()
+    tag_search_entry = Gtk.Template.Child()
+    tag_search_flowbox = Gtk.Template.Child()
 
     def __init__(
         self,
@@ -96,7 +99,11 @@ class ZLibAddBookDialog(Adw.Dialog):
 
         self.cancel_button.connect("clicked", lambda _button: self.close())
         self.add_button.connect("clicked", self._on_add)
-        self.tag_add_button.connect("clicked", self._open_tag_popup)
+
+        self.tag_add_popover.connect("map", lambda _p: self._populate_tag_search())
+        self.tag_search_entry.connect("search-changed", self._on_popup_search)
+        self.tag_search_flowbox.connect("child-activated", self._on_popup_row_activated)
+        self.tag_search_entry.connect("activate", self._on_popup_add)
 
     def _rebuild_tag_pills(self) -> None:
         child = self.tag_flowbox.get_first_child()
@@ -129,99 +136,44 @@ class ZLibAddBookDialog(Adw.Dialog):
             self._tags.remove(tag)
             self._rebuild_tag_pills()
 
-    def _open_tag_popup(self, _button) -> None:
-        popover = Gtk.Popover()
-        popover.set_parent(self.tag_add_button)
-        popover.set_position(Gtk.PositionType.BOTTOM)
+    def _populate_tag_search(self, filter_text: str = "") -> None:
+        fb = self.tag_search_flowbox
+        child = fb.get_first_child()
+        while child:
+            nxt = child.get_next_sibling()
+            fb.remove(child)
+            child = nxt
+        for tag in ALL_TAGS:
+            if tag in self._tags:
+                continue
+            if filter_text and filter_text.lower() not in tag.lower():
+                continue
+            lbl = Gtk.Label(label=tag)
+            lbl.set_halign(Gtk.Align.START)
+            lbl.set_valign(Gtk.Align.START)
+            lbl.set_css_classes(["tag-pill-large"])
+            fb.append(lbl)
 
-        box = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            spacing=6,
-            margin_top=6,
-            margin_bottom=6,
-            margin_start=6,
-            margin_end=6,
-        )
-        box.set_size_request(250, -1)
+    def _on_popup_search(self, entry: Gtk.SearchEntry) -> None:
+        self._populate_tag_search(entry.get_text())
 
-        popup_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        popup_header.append(Gtk.Label(label="", hexpand=True))
-        box.append(popup_header)
-
-        search_entry = Gtk.SearchEntry()
-        search_entry.set_placeholder_text("Etiket Ara...")
-        box.append(search_entry)
-
-        scrolled = Gtk.ScrolledWindow()
-        scrolled.set_valign(Gtk.Align.START)
-        scrolled.set_min_content_height(200)
-        scrolled.set_max_content_height(300)
-
-        search_flowbox = Gtk.FlowBox()
-        search_flowbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        search_flowbox.set_max_children_per_line(1)
-        search_flowbox.set_column_spacing(4)
-        search_flowbox.set_row_spacing(4)
-        search_flowbox.set_homogeneous(False)
-        scrolled.set_child(search_flowbox)
-        box.append(scrolled)
-
-        popover.set_child(box)
-
-        def populate(filter_text: str = "") -> None:
-            child = search_flowbox.get_first_child()
-            while child:
-                nxt = child.get_next_sibling()
-                search_flowbox.remove(child)
-                child = nxt
-            for tag in ALL_TAGS:
-                if tag in self._tags:
-                    continue
-                if filter_text and filter_text.lower() not in tag.lower():
-                    continue
-                lbl = Gtk.Label(label=tag)
-                lbl.set_halign(Gtk.Align.START)
-                lbl.set_valign(Gtk.Align.START)
-                lbl.set_css_classes(["tag-pill-large"])
-                search_flowbox.append(lbl)
-
-        def on_search_changed(entry):
-            populate(entry.get_text())
-
-        def on_add_clicked(_btn):
-            selected = search_flowbox.get_selected_children()
-            if selected:
-                tag = selected[0].get_child().get_label()
-                if tag not in self._tags:
-                    self._tags.append(tag)
-                    self._rebuild_tag_pills()
-            popover.popdown()
-
-        def on_row_activated(_fb, child):
-            tag = child.get_child().get_label()
+    def _on_popup_add(self, _btn=None) -> None:
+        selected = self.tag_search_flowbox.get_selected_children()
+        if selected:
+            tag = selected[0].get_child().get_label()
             if tag not in self._tags:
                 self._tags.append(tag)
                 self._rebuild_tag_pills()
-            popover.popdown()
+        self.tag_add_popover.popdown()
 
-        search_entry.connect("search-changed", on_search_changed)
-        search_entry.connect("activate", on_add_clicked)
+    def _on_popup_row_activated(self, _fb, child) -> None:
+        tag = child.get_child().get_label()
+        if tag not in self._tags:
+            self._tags.append(tag)
+            self._rebuild_tag_pills()
+        self.tag_add_popover.popdown()
 
-        # lazy-populate on first map so the popup auto-sizes with content
-        populated = False
 
-        def on_map(_p):
-            nonlocal populated
-            if not populated:
-                populate()
-                populated = True
-
-        popover.connect("map", on_map)
-
-        add_btn.connect("clicked", on_add_clicked)
-        search_flowbox.connect("child-activated", on_row_activated)
-
-        popover.popup()
 
     def _on_type_changed(self, _row, _param) -> None:
         self._update_book_image()
