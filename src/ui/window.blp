@@ -54,32 +54,33 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       Gtk.Box {
         orientation: vertical;
         margin-start: 12;
-        margin-top: 4;
-        margin-bottom: 4;
-		spacing: 2;
+        margin-top: 8;
+        margin-bottom: 8;
+        margin-end: 4;
+        spacing: 2;
 
-		Gtk.Label card_selected_label {
-		  halign: start;
-		  styles [
-			  "heading",
-		  ]
+        Gtk.Label card_selected_label {
+          halign: start;
+          margin-bottom: 4;
 
-		  hexpand: true;
-		  ellipsize: end;
-		}
+          styles [
+            "heading",
+          ]
+
+          hexpand: true;
+          ellipsize: end;
+        }
 
         Gtk.Box {
           spacing: 6;
           halign: start;
 
-          Gtk.Box pill_container {
-          }
+          Gtk.Box pill_container {}
 
           Gtk.Box tag_pill_container {
             spacing: 4;
             sensitive: false;
           }
-
         }
       }
 
@@ -87,9 +88,9 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       Gtk.Button {
         label: _("Çalıştır");
         action-name: "win.launch-card";
-        margin-top: 6;
-        margin-bottom: 6;
-        margin-end: 6;
+        margin-top: 8;
+        margin-bottom: 8;
+        margin-end: 8;
 
         styles [
           "suggested-action",
@@ -102,8 +103,8 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
         tooltip-text: _("Diğer Eylemler");
         menu-model: card_actions_menu;
         direction: up;
-        margin-top: 6;
-        margin-bottom: 6;
+        margin-top: 8;
+        margin-bottom: 8;
         margin-end: 6;
       }
     }
