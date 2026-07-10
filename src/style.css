@@ -33,3 +33,46 @@
     color: #ffffff;
     font-size: 0.75em;
 }
+
+.tag-pill-label {
+    background: #3a3a3a;
+    border-radius: 8px 0 0 8px;
+    padding: 2px 6px;
+    font-size: 0.75em;
+}
+
+.tag-pill-label label {
+    color: #ffffff;
+}
+
+.tag-pill-remove {
+    background: #e53935;
+    border-radius: 0 8px 8px 0;
+    min-width: 16px;
+    min-height: 16px;
+    padding: 0;
+    border: none;
+}
+
+.tag-pill-remove image {
+    color: #ffffff;
+}
+
+.tag-pill-large {
+    border-radius: 8px;
+    padding: 4px 10px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+}
+
+actionbar {
+    padding: 0;
+    min-height: 0;
+}
+
+actionbar button,
+actionbar menubutton {
+    min-height: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
