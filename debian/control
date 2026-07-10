@@ -1,0 +1,27 @@
+Source: pardus-z-kutuphane
+Section: utils
+Priority: optional
+Maintainer: qewer <qewer@qewer.dev>
+Build-Depends: debhelper-compat (= 13),
+               meson (>= 1.0.0),
+               ninja-build,
+               blueprint-compiler,
+               gettext,
+               desktop-file-utils,
+               appstream,
+               libglib2.0-dev-bin,
+               libglib2.0-bin
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+
+Package: pardus-z-kutuphane
+Architecture: all
+Depends: ${misc:Depends},
+         python3,
+         python3-gi,
+         gir1.2-gtk-4.0 (>= 4.14),
+         gir1.2-adw-1 (>= 1.5),
+         python3-filetype,
+         wine
+Description: Pardus Z-Kütüphane
+ Pardus için özel olarak geliştirilmiş, kullanıcı dostu bir Z-Kitap çalıştırma ve organizasyon aracı

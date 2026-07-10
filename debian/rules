@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+# The meson tests validate the desktop/appstream/schema files and are not
+# needed to produce the package; skip them during the build.
+override_dh_auto_test:

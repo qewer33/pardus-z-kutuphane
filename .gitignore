@@ -4,3 +4,11 @@ prefix/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Debian packages
+*.deb
+debian/files
+debian/.debhelper/
+debian/pardus-z-kutuphane/
+debian/*.substvars
+debian/debhelper-build-stamp
