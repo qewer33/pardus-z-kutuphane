@@ -11,13 +11,13 @@ Pardus Z-Kütüphane, Gazi Üniversitesi'nden **Anadolu Penguenleri** takımı t
 
 ## Kullanım
 
-## Kütüphane Görünümü
+### Kütüphane Görünümü
 
-
+Uygulamaya eklenen Z-Kitaplar, ızgara şeklindeki kütüphane görünümüne eklenir. Kütüphane görümününde, 
 
 ### Kitap Ekleme
 
-Pencerenin sol üst köşesinde bulunan **Eklee** butonu kullanılarak kütüphaneye Z-Kitao eklenebilir. Ekle butonuna tıklandığında **Dosya ekle** ve **Bağlantı ekle** olmak üzere iki seçenek çıkar:
+Pencerenin sol üst köşesinde bulunan **Ekle** butonu kullanılarak kütüphaneye Z-Kitao eklenebilir. Ekle butonuna tıklandığında **Dosya ekle** ve **Bağlantı ekle** olmak üzere iki seçenek çıkar:
 
 - **Dosya ekleme**: Çalıştırılabilir uygulama (Windows `.exe` veya Linux `.AppImage`/`.fernus`) veya PDF (`.pdf`) dosyaları ***Dosya ekle** seçeneği seçildikten sonra çıkan dosya seçicididen seçilerek eklenebilir. Ayrıca istenilen dosyalar dosya yöneticisi üzerinden Pardus Z-Kütüphane penceresine **sürükle bırak** yapılarak da eklenebilir.
 -  **Bağlantı ekleme**: Web kitapları, tarayıcıdan link olarak kopyalanıp **Bağlantı ekle** seçeneği seçildikten sonra açılan penceredeki girdiye yaıştırılarak eklenebilir.
@@ -27,6 +27,8 @@ Seçilen yöntem ile ekleme yapıldıktan sonra, **Kitap Ekle** penceresi açıl
 Kitap özellikleri, kitap eklendikten sonra Çalıştır butonunun yanındaki menü içerisindeki **Düzenle** seçeneği seçilerek de düzenlenebilir.
 
 ### Kitap Arama ve Filtreleme
+
+Sağ üstte bulunan **arama ikonuna** tıklanınca yukarıdan aılan **arama çubuğu** kullanılarak kütüphanedeki Z-Kitaplar arasında arama yapılabilir.
 
 ## Geliştirme ve Altyapı
 

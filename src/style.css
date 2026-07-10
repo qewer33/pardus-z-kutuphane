@@ -29,20 +29,15 @@
 .tag-pill {
     border-radius: 8px;
     padding: 1px 6px;
-    background-color: #3a3a3a;
-    color: #ffffff;
+    background-color: alpha(currentColor, 0.1);
     font-size: 0.75em;
 }
 
 .tag-pill-label {
-    background: #3a3a3a;
+    background: alpha(currentColor, 0.1);
     border-radius: 8px 0 0 8px;
     padding: 2px 6px;
     font-size: 0.75em;
-}
-
-.tag-pill-label label {
-    color: #ffffff;
 }
 
 .tag-pill-remove {
@@ -61,8 +56,7 @@
 .tag-pill-large {
     border-radius: 8px;
     padding: 4px 10px;
-    background-color: #3a3a3a;
-    color: #ffffff;
+    background-color: alpha(currentColor, 0.1);
 }
 
 actionbar {

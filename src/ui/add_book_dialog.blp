@@ -61,49 +61,56 @@ template $ZLibAddBookDialog: Adw.Dialog {
           title: _("Tür");
         }
 
-		Adw.PreferencesRow{
+        Adw.PreferencesRow {
+          Gtk.Box {
+            orientation: vertical;
+            margin-start: 12;
+            margin-end: 12;
+            margin-top: 12;
+            margin-bottom: 12;
+
             Gtk.Box {
-				orientation: vertical;
-				Gtk.Box {
-					orientation: horizontal;
-					spacing: 6;
-					hexpand: true;
+              orientation: horizontal;
+              spacing: 6;
+              hexpand: true;
 
-					Gtk.Label {
-						label: _("Etiketler:");
-						valign: center;
-					}
+              Gtk.Label {
+                label: _("Etiketler:");
+                valign: center;
+              }
 
-					Gtk.Label {
-						hexpand: true;
-					}
+              Gtk.Label {
+                hexpand: true;
+              }
 
-					Gtk.Button tag_add_button {
-						child: Gtk.Box {
-							spacing: 4;
-							Gtk.Image {
-								icon-name: "list-add-symbolic";
-							}
-							Gtk.Label {
-								label: _("Ekle");
-							}
-							};
+              Gtk.Button tag_add_button {
+                child: Gtk.Box {
+                  spacing: 4;
 
-							valign: center;
-							tooltip-text: _("Etiket Ekle");
-						}
-					}
+                  Gtk.Image {
+                    icon-name: "list-add-symbolic";
+                  }
 
-					Gtk.FlowBox tag_flowbox {
-					halign: start;
-					max-children-per-line: 20;
-					column-spacing: 2;
-					row-spacing: 2;
-					selection-mode: none;
-					homogeneous: false;
-				}
-			}
-		}
+                  Gtk.Label {
+                    label: _("Ekle");
+                  }
+                };
+
+                valign: center;
+                tooltip-text: _("Etiket Ekle");
+              }
+            }
+
+            Gtk.FlowBox tag_flowbox {
+              halign: start;
+              max-children-per-line: 20;
+              column-spacing: 2;
+              row-spacing: 2;
+              selection-mode: none;
+              homogeneous: false;
+            }
+          }
+        }
       }
     };
   };

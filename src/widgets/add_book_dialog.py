@@ -134,11 +134,17 @@ class ZLibAddBookDialog(Adw.Dialog):
         popover.set_parent(self.tag_add_button)
         popover.set_position(Gtk.PositionType.BOTTOM)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, margin_top=6, margin_bottom=6, margin_start=6, margin_end=6)
+        box = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=6,
+            margin_top=6,
+            margin_bottom=6,
+            margin_start=6,
+            margin_end=6,
+        )
         box.set_size_request(250, -1)
 
         popup_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        popup_header.append(Gtk.Label(label="Etiketler:"))
         popup_header.append(Gtk.Label(label="", hexpand=True))
         box.append(popup_header)
 
@@ -159,11 +165,6 @@ class ZLibAddBookDialog(Adw.Dialog):
         search_flowbox.set_homogeneous(False)
         scrolled.set_child(search_flowbox)
         box.append(scrolled)
-
-        add_btn = Gtk.Button(label="Ekle")
-        add_btn.set_halign(Gtk.Align.END)
-        add_btn.add_css_class("suggested-action")
-        box.append(add_btn)
 
         popover.set_child(box)
 
