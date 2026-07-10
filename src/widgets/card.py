@@ -85,6 +85,15 @@ class ZLibCard(Adw.Bin):
         self.card_pill_container.append(self.type_pill)
         self.refresh()
 
+        gesture = Gtk.GestureClick()
+        gesture.set_button(0)
+        gesture.connect("pressed", self._on_double_click)
+        self.add_controller(gesture)
+
+    def _on_double_click(self, _gesture, n_press, _x, _y):
+        if n_press == 2:
+            self.activate_action("win.launch-card", None)
+
     def refresh(self) -> None:
         """Sync the widgets with the current card data."""
         self.card_title.set_text(self.data.title)
