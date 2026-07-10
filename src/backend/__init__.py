@@ -1,5 +1,6 @@
 from .wine import WineBackend
 from .elf import ELFBackend
+from .pdf import PDFBackend
 from .typedetector import TypeDetector, ExecutableType
 from .launcher import Launcher
 from .publisherdetector import PublisherDetector
@@ -8,6 +9,7 @@ from .webbook import WebbookBackend
 __all__ = [
     "WineBackend",
     "ELFBackend",
+    "PDFBackend",
     "TypeDetector",
     "ExecutableType",
     "Launcher",

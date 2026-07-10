@@ -14,6 +14,8 @@ class ExecutableType(Enum):
     PE32 = "pe32"
     PE64 = "pe64"
 
+    PDF = "pdf"
+
     WEBBOOK = "webbook"
 
 
@@ -24,6 +26,12 @@ class TypeDetector:
 
         if kind is None:
             return ExecutableType.UNKNOWN
+
+        #
+        # PDF documents
+        #
+        if kind.extension == "pdf":
+            return ExecutableType.PDF
 
         #
         # Windows PE executables

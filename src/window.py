@@ -197,8 +197,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def _card_from_file(self, path: str) -> ZLibCardData:
         type = TypeDetector.get_executable_type(path)
         publisher = PublisherDetector.detect(path)
+        icon = "application-pdf" if type == ExecutableType.PDF else "dialog-question-symbolic"
         return ZLibCardData(
-            Path(path).stem, "dialog-question-symbolic", path, type, publisher
+            Path(path).stem, icon, path, type, publisher
         )
 
     def _show_add_book_dialog(self, card_data: ZLibCardData) -> None:
