@@ -23,9 +23,15 @@ import threading
 from pathlib import Path
 from urllib.parse import urlparse
 
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
-from .backend import ExecutableType, Launcher, PublisherDetector, TagDetector, TypeDetector
+from .backend import (
+    ExecutableType,
+    Launcher,
+    PublisherDetector,
+    TagDetector,
+    TypeDetector,
+)
 from .util.logger import get_logger
 from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData, ZLibTypePill
 
@@ -50,6 +56,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_selected_label = Gtk.Template.Child()
     tag_pill_container = Gtk.Template.Child()
     pill_container = Gtk.Template.Child()
+    search_button = Gtk.Template.Child()
+    search_bar = Gtk.Template.Child()
+    search_entry = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -68,6 +77,26 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
         drop_target.connect("drop", self.on_file_drop)
         self.add_controller(drop_target)
+
+        # setup search
+
+        self.search_button.bind_property(
+            "active",
+            self.search_bar,
+            "search-mode-enabled",
+            GObject.BindingFlags.BIDIRECTIONAL,
+        )
+        self.search_bar.connect_entry(self.search_entry)
+        self.search_bar.set_key_capture_widget(self)
+        self.search_entry.connect("search-changed", self.on_search_changed)
+        self.search_bar.connect(
+            "notify::search-mode-enabled", self.on_search_mode_changed
+        )
+
+        # disable bell
+        settings = Gtk.Settings.get_default()
+        if settings is not None:
+            settings.set_property("gtk-error-bell", False)
 
         # setup card view actions
         self.card_view.connect("card-selected", self.on_card_selected)
@@ -100,6 +129,16 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         settings.bind("width", self, "default-width", Gio.SettingsBindFlags.DEFAULT)
         settings.bind("height", self, "default-height", Gio.SettingsBindFlags.DEFAULT)
         settings.bind("maximized", self, "maximized", Gio.SettingsBindFlags.DEFAULT)
+
+    # search
+
+    def on_search_changed(self, entry: Gtk.SearchEntry) -> None:
+        self.card_view.set_search_text(entry.get_text())
+
+    def on_search_mode_changed(self, search_bar, _param) -> None:
+        # clear the filter when the search bar is closed
+        if not search_bar.get_search_mode():
+            self.search_entry.set_text("")
 
     # library persistence
 
@@ -205,11 +244,15 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def _card_from_file(self, path: str) -> ZLibCardData:
         type = TypeDetector.get_executable_type(path)
         publisher = PublisherDetector.detect(path)
-        icon = "application-pdf" if type == ExecutableType.PDF else "dialog-question-symbolic"
-        tags = TagDetector.detect_from_filename(path) or TagDetector.detect_from_publisher(publisher)
-        return ZLibCardData(
-            Path(path).stem, icon, path, type, publisher, tags
+        icon = (
+            "application-pdf"
+            if type == ExecutableType.PDF
+            else "dialog-question-symbolic"
         )
+        tags = TagDetector.detect_from_filename(
+            path
+        ) or TagDetector.detect_from_publisher(publisher)
+        return ZLibCardData(Path(path).stem, icon, path, type, publisher, tags)
 
     def _show_add_book_dialog(self, card_data: ZLibCardData) -> None:
         dialog = ZLibAddBookDialog(card_data, self.add_card)

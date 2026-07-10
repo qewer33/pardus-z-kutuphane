@@ -88,8 +88,8 @@ _TAG_KEYWORDS: dict[frozenset[str], str] = {
 
 
 def _tokenize(text: str) -> list[str]:
-    from .publisherdetector import Normalizer
-    return [Normalizer.normalize(w) for w in Normalizer.WORD.findall(text)]
+    from ..util.normalizer import Normalizer
+    return Normalizer.words(text)
 
 
 class TagDetector:

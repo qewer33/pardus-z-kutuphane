@@ -19,6 +19,7 @@
 
 from gi.repository import Gio, GObject, Gtk
 
+from ..util.normalizer import Normalizer
 from .card import ZLibCard, ZLibCardData
 
 
@@ -48,9 +49,13 @@ class ZLibCardView(Gtk.FlowBox):
         super().__init__(**kwargs)
         self.init_template()
 
-        # the model is the source of truth; the FlowBox mirrors it
+        # the store is the main model
+        # filter model applies the search and the FlowBox mirrors the filtered result
         self.store = Gio.ListStore.new(ZLibCardItem)
-        self.bind_model(self.store, self._create_card)
+        self._search_text = ""
+        self._filter = Gtk.CustomFilter.new(self._match)
+        self._filter_model = Gtk.FilterListModel.new(self.store, self._filter)
+        self.bind_model(self._filter_model, self._create_card)
         self.store.connect("items-changed", lambda *_: self.emit("library-changed"))
 
         self.connect("selected-children-changed", self._on_selection_changed)
@@ -58,6 +63,18 @@ class ZLibCardView(Gtk.FlowBox):
     @property
     def cards_data_list(self) -> list[ZLibCardData]:
         return [self.store.get_item(i).data for i in range(self.store.get_n_items())]
+
+    def set_search_text(self, text: str) -> None:
+        # use Normalizer to handle turkish letters
+        self._search_text = Normalizer.normalize(text.strip())
+        self._filter.changed(Gtk.FilterChange.DIFFERENT)
+
+    def _match(self, item: ZLibCardItem, *_) -> bool:
+        if not self._search_text:
+            return True
+        data = item.data
+        haystack = Normalizer.normalize(f"{data.title} {data.publisher or ''}")
+        return self._search_text in haystack
 
     def _create_card(self, item: ZLibCardItem) -> ZLibCard:
         return ZLibCard(item.data)
@@ -80,7 +97,13 @@ class ZLibCardView(Gtk.FlowBox):
         children = self.get_selected_children()
         if not children:
             return
-        self.store.remove(children[0].get_index())
+        # map the selected widget back to its store index by identity, since a
+        # child's index is relative to the filtered view, not the store
+        card_data = children[0].get_child().data
+        for i in range(self.store.get_n_items()):
+            if self.store.get_item(i).data is card_data:
+                self.store.remove(i)
+                return
 
     def _on_selection_changed(self, _flowbox):
         self.emit("card-selected", self.get_selected_card())

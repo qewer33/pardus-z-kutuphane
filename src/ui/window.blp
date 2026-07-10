@@ -44,6 +44,22 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
         tooltip-text: _("Main Menu");
         menu-model: primary_menu;
       }
+
+      [end]
+      Gtk.ToggleButton search_button {
+        icon-name: "system-search-symbolic";
+        tooltip-text: _("Ara");
+      }
+    }
+
+    [top]
+    Gtk.SearchBar search_bar {
+      Gtk.SearchEntry search_entry {
+        hexpand: true;
+        placeholder-text: _("Z-Kitap ara...");
+        margin-start: 50;
+        margin-end: 50;
+      }
     }
 
     [bottom]
