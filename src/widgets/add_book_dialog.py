@@ -182,7 +182,7 @@ class ZLibAddBookDialog(Adw.Dialog):
         book_type = self._categories[self.type_row.get_selected()][1]
         self.book_icon_base.set_from_resource(book_resource(book_type))
         if not self._has_publisher_icon:
-            self.book_icon_overlay.set_from_icon_name(type_icon(book_type))
+            self.book_icon_overlay.set_from_resource(type_icon(book_type))
 
     def _on_publisher_icon_ready(self, path: str) -> None:
         if self.card_data.publisher:

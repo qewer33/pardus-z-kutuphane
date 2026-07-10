@@ -6,7 +6,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 from ..backend.publisherdetector import PublisherIconCache
 from ..backend.tags import TagDetector
 from ..backend.typedetector import ExecutableType
-from .type_pill import ZLibTypePill, book_resource, type_icon
+from .type_pill import ZLibTypePill, book_resource, pill_info, type_icon
 
 UNKNOWN_PUBLISHER = "Bilinmeyen Yayıncı"
 
@@ -83,6 +83,7 @@ class ZLibCard(Adw.Bin):
         self.data = data
         self.type_pill = ZLibTypePill()
         self.card_pill_container.append(self.type_pill)
+        self._type_class = None
         self.refresh()
 
         gesture = Gtk.GestureClick()
@@ -101,13 +102,19 @@ class ZLibCard(Adw.Bin):
         self.type_pill.set_book_type(self.data.type)
         self.card_icon_base.set_from_resource(book_resource(self.data.type))
 
+        _, _, css_class = pill_info(self.data.type)
+        if self._type_class:
+            self.remove_css_class(self._type_class)
+        self.add_css_class(css_class)
+        self._type_class = css_class
+
         pub_icon_path = PublisherIconCache.path_for(self.data.publisher)
         if pub_icon_path:
             set_image_from_file(self.card_icon_overlay, pub_icon_path)
         else:
             # no cached publisher logo: fall back to the book's type icon, and
             # fetch the logo (if the publisher has one) to swap in when ready
-            self.card_icon_overlay.set_from_icon_name(type_icon(self.data.type))
+            self.card_icon_overlay.set_from_resource(type_icon(self.data.type))
             if self.data.publisher is not None:
                 PublisherIconCache.fetch_async(
                     self.data.publisher, self._on_publisher_icon_ready
