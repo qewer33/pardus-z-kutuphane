@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from .elf import ELFBackend
+from .pdf import PDFBackend
 from .typedetector import ExecutableType
 from .webbook import WebbookBackend
 from .wine import WineBackend
@@ -35,7 +36,7 @@ class Launcher:
     @staticmethod
     def ensure_execute_perm(app):
         """Add execute permissions (required if ELF, optional if wine)"""
-        if app.type != ExecutableType.WEBBOOK:
+        if app.type not in (ExecutableType.WEBBOOK, ExecutableType.PDF):
             try:
                 if not os.access(app.path, os.X_OK):
                     logger.info("File %s does not have user execute permissions, running chmod", app.path) 
@@ -67,5 +68,7 @@ class Launcher:
                 arguments=app.arguments,
                 wine_prefix=app.wine_prefix,
             )
+        elif app.type == ExecutableType.PDF:
+            return PDFBackend.launch(path=app.path)
         elif app.type == ExecutableType.WEBBOOK:
             return WebbookBackend.launch(url=app.path)

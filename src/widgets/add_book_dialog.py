@@ -6,6 +6,7 @@ from .card import UNKNOWN_PUBLISHER, ZLibCardData, set_image_from_file
 
 # launch categories
 _FILE_CATEGORIES = [
+    ("PDF Dosyası", ExecutableType.PDF),
     ("Linux Uygulaması", ExecutableType.ELF),
     ("Windows Uygulaması", ExecutableType.PE64),
 ]
@@ -13,11 +14,12 @@ _WEB_CATEGORY = ("Web Kitabı", ExecutableType.WEBBOOK)
 
 # detected type
 _CATEGORY_INDEX = {
-    ExecutableType.ELF: 0,
-    ExecutableType.APPIMAGE_V1: 0,
-    ExecutableType.APPIMAGE_V2: 0,
-    ExecutableType.PE32: 1,
-    ExecutableType.PE64: 1,
+    ExecutableType.PDF: 0,
+    ExecutableType.ELF: 1,
+    ExecutableType.APPIMAGE_V1: 1,
+    ExecutableType.APPIMAGE_V2: 1,
+    ExecutableType.PE32: 2,
+    ExecutableType.PE64: 2,
 }
 
 
