@@ -39,6 +39,13 @@ os.environ['GSETTINGS_SCHEMA_DIR'] = (
     schema_dir + os.pathsep + existing if existing else schema_dir
 )
 
+# make our installed icons (and other data) discoverable under a custom prefix;
+# GTK searches $XDG_DATA_DIRS/icons for the app icon
+datadir = os.path.normpath(os.path.join(pkgdatadir, '..'))
+xdg_data_dirs = os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')
+if datadir not in xdg_data_dirs.split(os.pathsep):
+    os.environ['XDG_DATA_DIRS'] = datadir + os.pathsep + xdg_data_dirs
+
 locale.bindtextdomain('pardus-z-kutuphane', localedir)
 locale.textdomain('pardus-z-kutuphane')
 gettext.bindtextdomain('pardus-z-kutuphane', localedir)
