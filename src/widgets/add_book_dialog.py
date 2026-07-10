@@ -3,6 +3,7 @@ from gi.repository import Adw, Gtk
 from ..backend.publisherdetector import PublisherDetector, PublisherIconCache
 from ..backend.typedetector import ExecutableType
 from .card import UNKNOWN_PUBLISHER, ZLibCardData, set_image_from_file
+from .type_pill import book_resource, type_icon
 
 # launch categories
 _FILE_CATEGORIES = [
@@ -57,13 +58,16 @@ class ZLibAddBookDialog(Adw.Dialog):
         pub_icon_path = PublisherIconCache.path_for(card_data.publisher)
         if pub_icon_path:
             set_image_from_file(self.book_icon_overlay, pub_icon_path)
-            self.book_icon_overlay.set_visible(True)
-        elif card_data.publisher is None:
-            self.book_icon_overlay.set_from_icon_name("dialog-question-symbolic")
-            self.book_icon_overlay.set_visible(True)
+            self._has_publisher_icon = True
         else:
-            self.book_icon_overlay.set_visible(False)
-            PublisherIconCache.fetch_async(card_data.publisher, self._on_publisher_icon_ready)
+            # no cached logo: fall back to the type icon (set in _update_book_image),
+            # and fetch the logo (if any) to swap in when ready
+            self._has_publisher_icon = False
+            if card_data.publisher is not None:
+                PublisherIconCache.fetch_async(
+                    card_data.publisher, self._on_publisher_icon_ready
+                )
+        self.book_icon_overlay.set_visible(True)
 
         self.title_row.set_text(card_data.title)
 
@@ -81,13 +85,29 @@ class ZLibAddBookDialog(Adw.Dialog):
             self.type_row.set_selected(_CATEGORY_INDEX.get(card_data.type, 0))
         self.type_row.set_sensitive(not self.is_web)
 
+        # tint the book cover to match the selected type, live
+        self.type_row.connect("notify::selected", self._on_type_changed)
+        self._update_book_image()
+
         self.cancel_button.connect("clicked", lambda _button: self.close())
         self.add_button.connect("clicked", self._on_add)
+
+    def _on_type_changed(self, _row, _param) -> None:
+        self._update_book_image()
+
+    def _update_book_image(self) -> None:
+        book_type = self._categories[self.type_row.get_selected()][1]
+        self.book_icon_base.set_from_resource(book_resource(book_type))
+        # keep the fallback overlay icon in sync with the type (unless a
+        # publisher logo is being shown)
+        if not self._has_publisher_icon:
+            self.book_icon_overlay.set_from_icon_name(type_icon(book_type))
 
     def _on_publisher_icon_ready(self, path: str) -> None:
         if self.card_data.publisher:
             set_image_from_file(self.book_icon_overlay, path)
             self.book_icon_overlay.set_visible(True)
+            self._has_publisher_icon = True
 
     def _on_add(self, _button):
         card_data = self.card_data

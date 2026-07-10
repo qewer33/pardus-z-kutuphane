@@ -27,7 +27,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from .backend import ExecutableType, Launcher, PublisherDetector, TypeDetector
 from .util.logger import get_logger
-from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData
+from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData, ZLibTypePill
 
 logger = get_logger(os.path.basename(__file__))
 
@@ -48,12 +48,17 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_stack = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
+    pill_container = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         # guards library auto-save while cards are being loaded from disk
         self._loading = False
+
+        # type pill shown in the bottom bar for the selected card
+        self.type_pill = ZLibTypePill()
+        self.pill_container.append(self.type_pill)
 
         # remember window size across sessions
         self._bind_window_size()
@@ -219,6 +224,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             self._update_launch_action()
             return
         self.card_selected_label.set_text(card_data.title)
+        self.type_pill.set_book_type(card_data.type)
         self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)
         self._update_launch_action()

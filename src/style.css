@@ -1,0 +1,27 @@
+.type-pill {
+    border-radius: 12px;
+    padding: 1px 8px;
+    color: #ffffff;
+    font-size: 0.75em;
+    font-weight: bold;
+    border: 1px solid;
+}
+
+.type-pill label {
+    color: #ffffff;
+}
+
+.type-pill.type-app {
+    background-color: #abe86680;
+    border-color: #abe866;
+}
+
+.type-pill.type-web {
+    background-color: #3584e480;
+    border-color: #3584e4;
+}
+
+.type-pill.type-pdf {
+    background-color: #e01b2480;
+    border-color: #e01b24;
+}

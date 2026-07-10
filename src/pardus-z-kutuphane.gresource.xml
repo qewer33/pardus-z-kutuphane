@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <gresources>
   <gresource prefix="/tr/org/pardus/zkutuphane">
     <file preprocess="xml-stripblanks">window.ui</file>
@@ -6,7 +6,9 @@
     <file preprocess="xml-stripblanks">card.ui</file>
     <file preprocess="xml-stripblanks">add_book_dialog.ui</file>
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
-    <file>resources/book.png</file>
+    <file>resources/book-green.png</file>
+    <file>resources/book-red.png</file>
+    <file>resources/book-blue.png</file>
+    <file>style.css</file>
   </gresource>
 </gresources>
-

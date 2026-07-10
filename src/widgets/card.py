@@ -5,6 +5,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from ..backend.publisherdetector import PublisherIconCache
 from ..backend.typedetector import ExecutableType
+from .type_pill import ZLibTypePill, book_resource, type_icon
 
 UNKNOWN_PUBLISHER = "Bilinmeyen Yayıncı"
 
@@ -68,6 +69,7 @@ class ZLibCard(Adw.Bin):
 
     card_icon_base = Gtk.Template.Child()
     card_icon_overlay = Gtk.Template.Child()
+    card_pill_container = Gtk.Template.Child()
     card_title = Gtk.Template.Child()
     card_publisher = Gtk.Template.Child()
 
@@ -75,25 +77,29 @@ class ZLibCard(Adw.Bin):
         super().__init__(**kwargs)
 
         self.data = data
+        self.type_pill = ZLibTypePill()
+        self.card_pill_container.append(self.type_pill)
         self.refresh()
 
     def refresh(self) -> None:
         """Sync the widgets with the current card data."""
         self.card_title.set_text(self.data.title)
         self.card_publisher.set_text(self.data.publisher or UNKNOWN_PUBLISHER)
+        self.type_pill.set_book_type(self.data.type)
+        self.card_icon_base.set_from_resource(book_resource(self.data.type))
 
         pub_icon_path = PublisherIconCache.path_for(self.data.publisher)
         if pub_icon_path:
             set_image_from_file(self.card_icon_overlay, pub_icon_path)
-            self.card_icon_overlay.set_visible(True)
-        elif self.data.publisher is None:
-            self.card_icon_overlay.set_from_icon_name("dialog-question-symbolic")
-            self.card_icon_overlay.set_visible(True)
         else:
-            self.card_icon_overlay.set_visible(False)
-            PublisherIconCache.fetch_async(
-                self.data.publisher, self._on_publisher_icon_ready
-            )
+            # no cached publisher logo: fall back to the book's type icon, and
+            # fetch the logo (if the publisher has one) to swap in when ready
+            self.card_icon_overlay.set_from_icon_name(type_icon(self.data.type))
+            if self.data.publisher is not None:
+                PublisherIconCache.fetch_async(
+                    self.data.publisher, self._on_publisher_icon_ready
+                )
+        self.card_icon_overlay.set_visible(True)
 
     def _on_publisher_icon_ready(self, path: str) -> None:
         if self.data.publisher:
