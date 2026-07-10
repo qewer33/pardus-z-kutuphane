@@ -48,6 +48,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_stack = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
+    card_tags_label = Gtk.Template.Child()
     pill_container = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
@@ -228,6 +229,12 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             return
         self.card_selected_label.set_text(card_data.title)
         self.type_pill.set_book_type(card_data.type)
+
+        if card_data.tags:
+            self.card_tags_label.set_text("Etiketler: " + ", ".join(card_data.tags))
+            self.card_tags_label.set_visible(True)
+        else:
+            self.card_tags_label.set_visible(False)
         self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)
         self._update_launch_action()

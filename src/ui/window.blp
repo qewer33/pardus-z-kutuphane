@@ -51,16 +51,29 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       revealed: false;
 
       [start]
-      Gtk.Label card_selected_label {
-        styles [
-          "heading",
-        ]
-
+      Gtk.Box {
+        orientation: vertical;
         margin-start: 12;
         margin-top: 6;
         margin-bottom: 6;
-        max-width-chars: 30;
-        ellipsize: end;
+
+        Gtk.Label card_selected_label {
+          styles [
+            "heading",
+          ]
+
+          halign: start;
+          max-width-chars: 30;
+          ellipsize: end;
+        }
+
+        Gtk.Label card_tags_label {
+          halign: start;
+          styles [
+            "caption",
+            "dim-label",
+          ]
+        }
       }
 
       [start]
