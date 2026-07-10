@@ -25,3 +25,11 @@
     background-color: #e01b2480;
     border-color: #e01b24;
 }
+
+.tag-pill {
+    border-radius: 8px;
+    padding: 1px 6px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    font-size: 0.75em;
+}

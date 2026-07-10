@@ -40,6 +40,8 @@ ALL_TAGS = sorted({
     "ALES",
     "DGS",
     "LGS",
+    "Soru Bankası",
+    "Konu Anlatımı",
 })
 
 _TAG_KEYWORDS: dict[frozenset[str], str] = {
@@ -80,6 +82,8 @@ _TAG_KEYWORDS: dict[frozenset[str], str] = {
     frozenset({"ales"}): "ALES",
     frozenset({"dgs"}): "DGS",
     frozenset({"lgs"}): "LGS",
+    frozenset({"soru bankasi", "soru bankası", "sb", "test", "deneme", "soru"}): "Soru Bankası",
+    frozenset({"konu anlatimi", "konu anlatımı", "anlatim", "anlatım", "konu"}): "Konu Anlatımı",
 }
 
 

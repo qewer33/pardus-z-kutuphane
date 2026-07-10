@@ -54,31 +54,33 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       Gtk.Box {
         orientation: vertical;
         margin-start: 12;
-        margin-top: 6;
-        margin-bottom: 6;
+        margin-top: 4;
+        margin-bottom: 4;
+		spacing: 2;
 
-        Gtk.Label card_selected_label {
-          styles [
-            "heading",
-          ]
+		Gtk.Label card_selected_label {
+		  halign: start;
+		  styles [
+			  "heading",
+		  ]
 
+		  hexpand: true;
+		  ellipsize: end;
+		}
+
+        Gtk.Box {
+          spacing: 6;
           halign: start;
-          max-width-chars: 30;
-          ellipsize: end;
-        }
 
-        Gtk.Label card_tags_label {
-          halign: start;
-          styles [
-            "caption",
-            "dim-label",
-          ]
-        }
-      }
+          Gtk.Box pill_container {
+          }
 
-      [start]
-      Gtk.Box pill_container {
-        valign: center;
+          Gtk.Box tag_pill_container {
+            spacing: 4;
+            sensitive: false;
+          }
+
+        }
       }
 
       [end]

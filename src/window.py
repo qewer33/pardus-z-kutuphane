@@ -48,7 +48,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_stack = Gtk.Template.Child()
     card_action_bar = Gtk.Template.Child()
     card_selected_label = Gtk.Template.Child()
-    card_tags_label = Gtk.Template.Child()
+    tag_pill_container = Gtk.Template.Child()
     pill_container = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
@@ -229,12 +229,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             return
         self.card_selected_label.set_text(card_data.title)
         self.type_pill.set_book_type(card_data.type)
-
-        if card_data.tags:
-            self.card_tags_label.set_text("Etiketler: " + ", ".join(card_data.tags))
-            self.card_tags_label.set_visible(True)
-        else:
-            self.card_tags_label.set_visible(False)
+        self._build_tag_pills(card_data.tags or [])
         self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)
         self._update_launch_action()
@@ -286,6 +281,28 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         selected = self.card_view.get_selected_card()
         if selected is not None:
             self.lookup_action("launch-card").set_enabled(not selected.running)
+
+    def _build_tag_pills(self, tags: list[str]) -> None:
+        child = self.tag_pill_container.get_first_child()
+        while child:
+            nxt = child.get_next_sibling()
+            self.tag_pill_container.remove(child)
+            child = nxt
+
+        max_pills = 5
+        visible = tags[:max_pills]
+        extra = tags[max_pills:]
+
+        for tag in visible:
+            label = Gtk.Label(label=tag)
+            label.set_css_classes(["tag-pill"])
+            self.tag_pill_container.append(label)
+
+        if extra:
+            label = Gtk.Label(label=f"+{len(extra)}")
+            label.set_css_classes(["tag-pill"])
+            label.set_tooltip_text(", ".join(extra))
+            self.tag_pill_container.append(label)
 
     def _show_error(self, heading: str, body: str) -> None:
         dialog = Adw.AlertDialog(heading=heading, body=body)
