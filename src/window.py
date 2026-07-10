@@ -359,7 +359,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         dialog = ZLibAddBookDialog(
             card_data,
             self._on_card_configured,
-            title="Kitabı Yapılandır",
+            title="Kitabı Düzenle",
             confirm_label="Tamam",
         )
         dialog.present(self)
