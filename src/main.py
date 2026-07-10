@@ -53,10 +53,10 @@ class PardusZKutuphaneApplication(Adw.Application):
         about = Adw.AboutDialog(
             application_name="Pardus Z-Kütüphane",
             application_icon="tr.org.pardus.zkutuphane",
-            developer_name="qewer",
+            developer_name="Anadolu Penguenleri",
             version="0.1.0",
-            developers=["qewer"],
-            copyright="© 2026 qewer",
+            developers=["Yunus Erdem ERGÜL", "Murat YALÇIN"],
+            copyright="© 2026 Anadolu Penguenleri",
         )
         about.present(self.props.active_window)
 
