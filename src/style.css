@@ -53,6 +53,27 @@
     color: #ffffff;
 }
 
+flowboxchild:selected {
+    background: none;
+    color: inherit;
+}
+
+.book-card {
+    border-radius: 12px;
+}
+
+flowboxchild:selected .book-card.type-app {
+    background-color: alpha(#8fbc5d, 0.15);
+}
+
+flowboxchild:selected .book-card.type-web {
+    background-color: alpha(#048db7, 0.15);
+}
+
+flowboxchild:selected .book-card.type-pdf {
+    background-color: alpha(#ca3a3a, 0.15);
+}
+
 .tag-pill-large {
     border-radius: 8px;
     padding: 4px 10px;

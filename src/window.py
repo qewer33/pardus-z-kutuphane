@@ -63,6 +63,12 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        provider = Gtk.CssProvider()
+        provider.load_from_resource("/tr/org/pardus/zkutuphane/style.css")
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
         # guards library auto-save while cards are being loaded from disk
         self._loading = False
 

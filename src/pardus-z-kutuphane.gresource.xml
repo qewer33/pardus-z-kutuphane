@@ -9,6 +9,9 @@
     <file>resources/book-green.png</file>
     <file>resources/book-red.png</file>
     <file>resources/book-blue.png</file>
+    <file>resources/icon_app.svg</file>
+    <file>resources/icon_doc.svg</file>
+    <file>resources/icon_web.svg</file>
     <file>style.css</file>
   </gresource>
 </gresources>

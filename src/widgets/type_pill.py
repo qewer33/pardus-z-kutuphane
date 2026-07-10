@@ -21,12 +21,14 @@ from gi.repository import Gtk
 
 from ..backend.typedetector import ExecutableType
 
-# book type -> (label, symbolic icon, css class). Linux and Windows apps are
+_RESOURCE_PREFIX = "/tr/org/pardus/zkutuphane/resources"
+
+# book type -> (label, icon resource path, css class). Linux and Windows apps are
 # intentionally merged into a single "Uygulama" category; anything unrecognized
 # also falls back to it.
-_WEB = ("Web", "internet-web-browser-symbolic", "type-web")
-_PDF = ("PDF", "emblem-documents-symbolic", "type-pdf")
-_APP = ("Uygulama", "applications-all-symbolic", "type-app")
+_WEB = ("Web", f"{_RESOURCE_PREFIX}/icon_web.svg", "type-web")
+_PDF = ("PDF", f"{_RESOURCE_PREFIX}/icon_doc.svg", "type-pdf")
+_APP = ("Uygulama", f"{_RESOURCE_PREFIX}/icon_app.svg", "type-app")
 
 
 def pill_info(book_type: ExecutableType) -> tuple[str, str, str]:
@@ -38,7 +40,7 @@ def pill_info(book_type: ExecutableType) -> tuple[str, str, str]:
 
 
 def type_icon(book_type: ExecutableType) -> str:
-    """Symbolic icon name for a book type (same icon used by the pill)."""
+    """Resource path for a book type icon."""
     return pill_info(book_type)[1]
 
 
@@ -71,7 +73,7 @@ class ZLibTypePill(Gtk.Box):
 
     def set_book_type(self, book_type: ExecutableType) -> None:
         label, icon, css_class = pill_info(book_type)
-        self._icon.set_from_icon_name(icon)
+        self._icon.set_from_resource(icon)
         self._label.set_label(label)
 
         if self._current_class:
