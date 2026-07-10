@@ -64,18 +64,19 @@ template $ZLibAddBookDialog: Adw.Dialog {
         Adw.PreferencesRow {
           Gtk.Box {
             orientation: vertical;
-            margin-start: 2;
-            margin-end: 2;
-            margin-top: 2;
+            margin-start: 12;
+            margin-end: 12;
+            margin-top: 12;
             margin-bottom: 12;
 
             Gtk.Box {
               orientation: horizontal;
               spacing: 6;
               hexpand: true;
+              margin-bottom: 12;
 
               Gtk.Label {
-                label: _("Etiketler:");
+                label: _("Etiketler");
                 valign: center;
               }
 
@@ -104,7 +105,6 @@ template $ZLibAddBookDialog: Adw.Dialog {
                     spacing: 6;
                     margin-top: 6;
                     margin-bottom: 6;
-                    margin-start: 6;
                     margin-end: 6;
 
                     Gtk.SearchEntry tag_search_entry {
