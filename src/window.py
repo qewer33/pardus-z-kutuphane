@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
-from .backend import ExecutableType, Launcher, PublisherDetector, TypeDetector
+from .backend import ExecutableType, Launcher, PublisherDetector, TagDetector, TypeDetector
 from .util.logger import get_logger
 from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData, ZLibTypePill
 
@@ -148,12 +148,14 @@ class ZLibAppWindow(Adw.ApplicationWindow):
                 if url:
                     if not url.startswith(("http://", "https://")):
                         url = "https://" + url
+                    publisher = PublisherDetector.detect(url)
                     card_data = ZLibCardData(
                         title=urlparse(url).netloc or url,
                         icon="web-browser-symbolic",
                         path=url,
                         type=ExecutableType.WEBBOOK,
-                        publisher=PublisherDetector.detect(url),
+                        publisher=publisher,
+                        tags=TagDetector.detect_from_publisher(publisher),
                     )
                     self._show_add_book_dialog(card_data)
             dialog.destroy()
@@ -203,8 +205,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         type = TypeDetector.get_executable_type(path)
         publisher = PublisherDetector.detect(path)
         icon = "application-pdf" if type == ExecutableType.PDF else "dialog-question-symbolic"
+        tags = TagDetector.detect_from_filename(path) or TagDetector.detect_from_publisher(publisher)
         return ZLibCardData(
-            Path(path).stem, icon, path, type, publisher
+            Path(path).stem, icon, path, type, publisher, tags
         )
 
     def _show_add_book_dialog(self, card_data: ZLibCardData) -> None:

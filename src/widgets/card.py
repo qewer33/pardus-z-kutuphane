@@ -4,6 +4,7 @@ from pathlib import Path
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from ..backend.publisherdetector import PublisherIconCache
+from ..backend.tags import TagDetector
 from ..backend.typedetector import ExecutableType
 from .type_pill import ZLibTypePill, book_resource, type_icon
 
@@ -27,6 +28,7 @@ class ZLibCardData:
     path: str
     type: ExecutableType
     publisher: str | None = None
+    tags: list[str] | None = None
     arguments: list[str] | None = None
     wine_prefix: Path = field(
         default_factory=lambda: (
@@ -44,6 +46,7 @@ class ZLibCardData:
             "path": self.path,
             "type": self.type.value,
             "publisher": self.publisher,
+            "tags": self.tags,
             "arguments": self.arguments,
             "wine_prefix": str(self.wine_prefix),
         }
@@ -56,6 +59,7 @@ class ZLibCardData:
             path=data["path"],
             type=ExecutableType(data["type"]),
             publisher=data.get("publisher"),
+            tags=data.get("tags"),
             arguments=data["arguments"],
             wine_prefix=Path(data["wine_prefix"]),
         )

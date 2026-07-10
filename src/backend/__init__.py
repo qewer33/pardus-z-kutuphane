@@ -4,6 +4,7 @@ from .pdf import PDFBackend
 from .typedetector import TypeDetector, ExecutableType
 from .launcher import Launcher
 from .publisherdetector import PublisherDetector
+from .tags import TagDetector
 from .webbook import WebbookBackend
 
 __all__ = [
@@ -14,5 +15,6 @@ __all__ = [
     "ExecutableType",
     "Launcher",
     "PublisherDetector",
+    "TagDetector",
     "WebbookBackend",
 ]
