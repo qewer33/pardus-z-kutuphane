@@ -4,7 +4,7 @@ from .pdf import PDFBackend
 from .typedetector import TypeDetector, ExecutableType
 from .launcher import Launcher
 from .publisherdetector import PublisherDetector
-from .tags import TagDetector
+from .tags import ALL_TAGS, TagDetector
 from .webbook import WebbookBackend
 
 __all__ = [

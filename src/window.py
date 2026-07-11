@@ -26,6 +26,7 @@ from urllib.parse import urlparse
 from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from .backend import (
+    ALL_TAGS,
     ExecutableType,
     Launcher,
     PublisherDetector,
@@ -33,7 +34,8 @@ from .backend import (
     TypeDetector,
 )
 from .util.logger import get_logger
-from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData, ZLibTypePill
+from .widgets import LogWindow, ZLibAddBookDialog, ZLibCardData
+from .widgets.type_pill import pill_info
 
 logger = get_logger(os.path.basename(__file__))
 
@@ -59,6 +61,14 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     search_button = Gtk.Template.Child()
     search_bar = Gtk.Template.Child()
     search_entry = Gtk.Template.Child()
+    search_publisher_btn = Gtk.Template.Child()
+    search_tag_btn = Gtk.Template.Child()
+    type_pill_icon = Gtk.Template.Child()
+    type_pill_label = Gtk.Template.Child()
+    publisher_filter_search = Gtk.Template.Child()
+    publisher_filter_list = Gtk.Template.Child()
+    tag_filter_search = Gtk.Template.Child()
+    tag_filter_list = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -71,10 +81,6 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         # guards library auto-save while cards are being loaded from disk
         self._loading = False
-
-        # type pill shown in the bottom bar for the selected card
-        self.type_pill = ZLibTypePill()
-        self.pill_container.append(self.type_pill)
 
         # remember window size across sessions
         self._bind_window_size()
@@ -95,6 +101,14 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         self.search_bar.connect_entry(self.search_entry)
         self.search_bar.set_key_capture_widget(self)
         self.search_entry.connect("search-changed", self.on_search_changed)
+        self._setup_filter_listbox(
+            self.publisher_filter_list, self.publisher_filter_search,
+            PublisherDetector.names(), self._on_publisher_filter,
+        )
+        self._setup_filter_listbox(
+            self.tag_filter_list, self.tag_filter_search,
+            ALL_TAGS, self._on_tag_filter,
+        )
         self.search_bar.connect(
             "notify::search-mode-enabled", self.on_search_mode_changed
         )
@@ -141,10 +155,58 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     def on_search_changed(self, entry: Gtk.SearchEntry) -> None:
         self.card_view.set_search_text(entry.get_text())
 
+    def _setup_filter_listbox(
+        self, listbox: Gtk.ListBox, search: Gtk.SearchEntry,
+        items: list[str], on_change,
+    ) -> None:
+        checkbuttons: list[Gtk.CheckButton] = []
+        for item in items:
+            cb = Gtk.CheckButton(label=item)
+            listbox.append(cb)
+            checkbuttons.append(cb)
+
+        def _update_filter(*_):
+            selected = {cb.get_label() for cb in checkbuttons if cb.get_active()}
+            on_change(selected)
+
+        def _on_search(*_):
+            text = search.get_text().strip().lower()
+            for cb in checkbuttons:
+                cb.set_visible(not text or text in cb.get_label().lower())
+
+        search.connect("search-changed", _on_search)
+        for cb in checkbuttons:
+            cb.connect("toggled", _update_filter)
+
+    def _on_publisher_filter(self, selected: set[str]) -> None:
+        self.card_view.set_search_publishers(selected)
+
+    def _on_tag_filter(self, selected: set[str]) -> None:
+        self.card_view.set_search_tags(selected)
+
     def on_search_mode_changed(self, search_bar, _param) -> None:
-        # clear the filter when the search bar is closed
         if not search_bar.get_search_mode():
             self.search_entry.set_text("")
+            self.publisher_filter_search.set_text("")
+            self.tag_filter_search.set_text("")
+            self._clear_filter_listbox(self.publisher_filter_list)
+            self._clear_filter_listbox(self.tag_filter_list)
+
+    @staticmethod
+    def _clear_filter_listbox(listbox: Gtk.ListBox) -> None:
+        child = listbox.get_first_child()
+        while child:
+            if isinstance(child, Gtk.CheckButton):
+                child.set_active(False)
+            child = child.get_next_sibling()
+
+    def _update_type_pill(self, book_type) -> None:
+        label, icon, css_class = pill_info(book_type)
+        self.type_pill_icon.set_from_resource(icon)
+        self.type_pill_label.set_label(label)
+        for cls in ("type-app", "type-web", "type-pdf"):
+            self.pill_container.remove_css_class(cls)
+        self.pill_container.add_css_class(css_class)
 
     # library persistence
 
@@ -277,7 +339,7 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             self._update_launch_action()
             return
         self.card_selected_label.set_text(card_data.title)
-        self.type_pill.set_book_type(card_data.type)
+        self._update_type_pill(card_data.type)
         self._build_tag_pills(card_data.tags or [])
         self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)

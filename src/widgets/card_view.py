@@ -53,6 +53,8 @@ class ZLibCardView(Gtk.FlowBox):
         # filter model applies the search, sort model orders by launch count
         self.store = Gio.ListStore.new(ZLibCardItem)
         self._search_text = ""
+        self._publishers: set[str] = set()
+        self._tags: set[str] = set()
         self._filter = Gtk.CustomFilter.new(self._match)
         self._filter_model = Gtk.FilterListModel.new(self.store, self._filter)
         self._sorter = Gtk.CustomSorter.new(self._sort_by_launch_count)
@@ -71,12 +73,32 @@ class ZLibCardView(Gtk.FlowBox):
         self._search_text = Normalizer.normalize(text.strip())
         self._filter.changed(Gtk.FilterChange.DIFFERENT)
 
+    def set_search_publishers(self, publishers: set[str]) -> None:
+        self._publishers = publishers
+        self._filter.changed(Gtk.FilterChange.DIFFERENT)
+
+    def set_search_tags(self, tags: set[str]) -> None:
+        self._tags = tags
+        self._filter.changed(Gtk.FilterChange.DIFFERENT)
+
     def _match(self, item: ZLibCardItem, *_) -> bool:
-        if not self._search_text:
-            return True
         data = item.data
-        haystack = Normalizer.normalize(f"{data.title} {data.publisher or ''}")
-        return self._search_text in haystack
+
+        if self._search_text:
+            haystack = Normalizer.normalize(f"{data.title} {data.publisher or ''}")
+            if self._search_text not in haystack:
+                return False
+
+        if self._publishers:
+            if data.publisher not in self._publishers:
+                return False
+
+        if self._tags:
+            card_tags = set(data.tags or [])
+            if not card_tags.intersection(self._tags):
+                return False
+
+        return True
 
     def _sort_by_launch_count(self, a: ZLibCardItem, b: ZLibCardItem, _user_data=None) -> int:
         return b.data.launch_count - a.data.launch_count

@@ -54,11 +54,81 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
 
     [top]
     Gtk.SearchBar search_bar {
-      Gtk.SearchEntry search_entry {
-        hexpand: true;
-        placeholder-text: _("Z-Kitap ara...");
+      Gtk.Box {
+        orientation: horizontal;
+        spacing: 6;
         margin-start: 50;
         margin-end: 50;
+
+        Gtk.SearchEntry search_entry {
+          hexpand: true;
+          placeholder-text: _("Z-Kitap ara...");
+		  tooltip-text : _("İsime Göre Ara");
+        }
+
+        Gtk.MenuButton search_publisher_btn {
+          label: _("Yayıncı");
+          tooltip-text: _("Yayıncıya Göre Ara");
+
+          popover: Gtk.Popover publisher_filter_popover {
+            Gtk.Box {
+              orientation: vertical;
+              spacing: 4;
+              margin-top: 6;
+              margin-bottom: 6;
+              margin-start: 6;
+              margin-end: 6;
+
+              Gtk.SearchEntry publisher_filter_search {
+                placeholder-text: _("Ara...");
+              }
+
+              Gtk.ScrolledWindow {
+                min-content-height: 200;
+                max-content-height: 300;
+                propagate-natural-width: true;
+                propagate-natural-height: true;
+                has-frame: false;
+
+                Gtk.ListBox publisher_filter_list {
+                  selection-mode: none;
+                }
+              }
+            }
+          };
+        }
+
+        Gtk.MenuButton search_tag_btn {
+          label: _("Etiket");
+          tooltip-text: _("Etiketlere Göre Ara");
+
+          popover: Gtk.Popover tag_filter_popover {
+            Gtk.Box {
+              orientation: vertical;
+              spacing: 4;
+              margin-top: 6;
+              margin-bottom: 6;
+              margin-start: 6;
+              margin-end: 6;
+
+              Gtk.SearchEntry tag_filter_search {
+                placeholder-text: _("Ara...");
+              }
+
+              Gtk.ScrolledWindow {
+                min-content-height: 200;
+                max-content-height: 300;
+                propagate-natural-width: true;
+                propagate-natural-height: true;
+                has-frame: false;
+
+                Gtk.ListBox tag_filter_list {
+                  selection-mode: none;
+                }
+              }
+            }
+          };
+        }
       }
     }
 
@@ -91,7 +161,15 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
           spacing: 6;
           halign: start;
 
-          Gtk.Box pill_container {}
+          Gtk.Box pill_container {
+            styles ["type-pill"]
+
+            Gtk.Image type_pill_icon {
+              pixel-size: 14;
+            }
+
+            Gtk.Label type_pill_label {}
+          }
 
           Gtk.Box tag_pill_container {
             spacing: 4;
