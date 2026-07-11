@@ -50,12 +50,14 @@ class ZLibCardView(Gtk.FlowBox):
         self.init_template()
 
         # the store is the main model
-        # filter model applies the search and the FlowBox mirrors the filtered result
+        # filter model applies the search, sort model orders by launch count
         self.store = Gio.ListStore.new(ZLibCardItem)
         self._search_text = ""
         self._filter = Gtk.CustomFilter.new(self._match)
         self._filter_model = Gtk.FilterListModel.new(self.store, self._filter)
-        self.bind_model(self._filter_model, self._create_card)
+        self._sorter = Gtk.CustomSorter.new(self._sort_by_launch_count)
+        self._sort_model = Gtk.SortListModel.new(self._filter_model, self._sorter)
+        self.bind_model(self._sort_model, self._create_card)
         self.store.connect("items-changed", lambda *_: self.emit("library-changed"))
 
         self.connect("selected-children-changed", self._on_selection_changed)
@@ -75,6 +77,12 @@ class ZLibCardView(Gtk.FlowBox):
         data = item.data
         haystack = Normalizer.normalize(f"{data.title} {data.publisher or ''}")
         return self._search_text in haystack
+
+    def _sort_by_launch_count(self, a: ZLibCardItem, b: ZLibCardItem, _user_data=None) -> int:
+        return b.data.launch_count - a.data.launch_count
+
+    def invalidate_sort(self) -> None:
+        self._sorter.changed(Gtk.SorterChange.DIFFERENT)
 
     def _create_card(self, item: ZLibCardItem) -> ZLibCard:
         return ZLibCard(item.data)

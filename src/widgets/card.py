@@ -36,6 +36,7 @@ class ZLibCardData:
         )
     )
     running: bool = False
+    launch_count: int = 0
     log_buffer: Gtk.TextBuffer = field(default_factory=Gtk.TextBuffer)
 
     def to_dict(self) -> dict:
@@ -49,6 +50,7 @@ class ZLibCardData:
             "tags": self.tags,
             "arguments": self.arguments,
             "wine_prefix": str(self.wine_prefix),
+            "launch_count": self.launch_count,
         }
 
     @classmethod
@@ -62,6 +64,7 @@ class ZLibCardData:
             tags=data.get("tags"),
             arguments=data["arguments"],
             wine_prefix=Path(data["wine_prefix"]),
+            launch_count=data.get("launch_count", 0),
         )
 
 

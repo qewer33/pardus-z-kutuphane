@@ -300,6 +300,9 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             return
 
         card_data.running = True
+        card_data.launch_count += 1
+        self.card_view.invalidate_sort()
+        self.save_library()
         card_data.log_buffer.set_text("")
         self._update_launch_action()
 
