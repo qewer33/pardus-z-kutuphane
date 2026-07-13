@@ -13,5 +13,20 @@
 			<default>false</default>
 			<summary>Window maximized state</summary>
 		</key>
+		<key name="wine-prefix" type="s">
+			<default>'~/.local/share/tr.org.pardus.zkutuphane/wineprefix'</default>
+			<summary>Default Wine prefix directory</summary>
+			<description>Directory used for Wine bottles when launching Windows executables.</description>
+		</key>
+		<key name="log-dir" type="s">
+			<default>'~/.local/state/tr.org.pardus.zkutuphane'</default>
+			<summary>Log directory</summary>
+			<description>Directory where application logs are stored.</description>
+		</key>
+		<key name="cache-dir" type="s">
+			<default>'~/.cache/tr.org.pardus.zkutuphane'</default>
+			<summary>Cache directory</summary>
+			<description>Directory for cached data such as publisher icons.</description>
+		</key>
 	</schema>
 </schemalist>

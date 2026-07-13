@@ -81,10 +81,33 @@ _USER_AGENT = (
 )
 
 
-class PublisherIconCache:
-    _CACHE_DIR = (
-        Path(GLib.get_user_cache_dir()) / "tr.org.pardus.zkutuphane" / "publisher_icons"
+def _cache_dir() -> Path:
+    try:
+        from gi.repository import Gio
+
+        source = Gio.SettingsSchemaSource.get_default()
+        if source is not None and source.lookup("tr.org.pardus.zkutuphane", True) is not None:
+            settings = Gio.Settings(schema_id="tr.org.pardus.zkutuphane")
+            val = settings.get_string("cache-dir")
+            if val:
+                return Path(val).expanduser() / "publisher_icons"
+    except Exception:
+        pass
+    return (
+        Path(GLib.get_user_cache_dir())
+        / "tr.org.pardus.zkutuphane"
+        / "publisher_icons"
     )
+
+
+class PublisherIconCache:
+    _CACHE_DIR: Path | None = None
+
+    @classmethod
+    def _get_dir(cls) -> Path:
+        if cls._CACHE_DIR is None:
+            cls._CACHE_DIR = _cache_dir()
+        return cls._CACHE_DIR
 
     @classmethod
     def path_for(cls, publisher: str | None) -> str | None:
@@ -94,7 +117,7 @@ class PublisherIconCache:
         if url is None:
             return None
         name = cls._url_to_name(url)
-        path = cls._CACHE_DIR / name
+        path = cls._get_dir() / name
         if path.exists():
             return str(path)
         return None
@@ -116,9 +139,10 @@ class PublisherIconCache:
 
             _logger = get_logger(os.path.basename(__file__))
 
-            cls._CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            cache_dir = cls._get_dir()
+            cache_dir.mkdir(parents=True, exist_ok=True)
             name = cls._url_to_name(url)
-            path = cls._CACHE_DIR / name
+            path = cache_dir / name
             if path.exists():
                 GLib.idle_add(on_ready, str(path))
                 return

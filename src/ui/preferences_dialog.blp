@@ -1,0 +1,46 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $PreferencesDialog: Adw.PreferencesDialog {
+  Adw.PreferencesPage {
+    title: _("Genel");
+    icon-name: "preferences-system-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("Yollar");
+
+      Adw.EntryRow wine_prefix_row {
+        title: _("Wine Prefix");
+        show-apply-button: true;
+
+        [suffix]
+        Gtk.Button wine_prefix_browse {
+          icon-name: "folder-open-symbolic";
+          tooltip-text: _("Select Directory");
+        }
+      }
+
+      Adw.EntryRow log_dir_row {
+        title: _("Günce Dizini");
+        show-apply-button: true;
+
+        [suffix]
+        Gtk.Button log_dir_browse {
+          icon-name: "folder-open-symbolic";
+          tooltip-text: _("Dizin seçiniz");
+        }
+      }
+
+      Adw.EntryRow cache_dir_row {
+        title: _("Önbellek Dizini");
+        show-apply-button: true;
+
+        [suffix]
+        Gtk.Button cache_dir_browse {
+          icon-name: "folder-open-symbolic";
+          tooltip-text: _("Dizin Seçiniz");
+        }
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@
     <file preprocess="xml-stripblanks">card.ui</file>
     <file preprocess="xml-stripblanks">add_book_dialog.ui</file>
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
+    <file preprocess="xml-stripblanks">preferences_dialog.ui</file>
     <file>resources/book-green.png</file>
     <file>resources/book-red.png</file>
     <file>resources/book-blue.png</file>

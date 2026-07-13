@@ -27,6 +27,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, Gio, Gtk
 
+from .widgets import PreferencesDialog
 from .window import ZLibAppWindow
 
 
@@ -61,7 +62,8 @@ class PardusZKutuphaneApplication(Adw.Application):
         about.present(self.props.active_window)
 
     def on_preferences_action(self, widget, _):
-        print("app.preferences action activated")
+        dialog = PreferencesDialog()
+        dialog.present(self.props.active_window)
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.

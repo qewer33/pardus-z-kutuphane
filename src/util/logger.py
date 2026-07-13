@@ -4,8 +4,25 @@ from pathlib import Path
 from gi.repository import GLib
 
 APP_NAME = "tr.org.pardus.zkutuphane"
+SCHEMA_ID = "tr.org.pardus.zkutuphane"
 
-LOG_DIR = Path(GLib.get_user_state_dir()) / APP_NAME
+
+def _default_log_dir() -> Path:
+    try:
+        from gi.repository import Gio
+
+        source = Gio.SettingsSchemaSource.get_default()
+        if source is not None and source.lookup(SCHEMA_ID, True) is not None:
+            settings = Gio.Settings(schema_id=SCHEMA_ID)
+            val = settings.get_string("log-dir")
+            if val:
+                return Path(val).expanduser()
+    except Exception:
+        pass
+    return Path(GLib.get_user_state_dir()) / APP_NAME
+
+
+LOG_DIR = _default_log_dir()
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_FILE = LOG_DIR / "app.log"

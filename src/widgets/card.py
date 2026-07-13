@@ -10,6 +10,23 @@ from .type_pill import ZLibTypePill, book_resource, pill_info, type_icon
 
 UNKNOWN_PUBLISHER = "Bilinmeyen Yayıncı"
 
+_SCHEMA_ID = "tr.org.pardus.zkutuphane"
+
+
+def _default_wine_prefix() -> Path:
+    try:
+        from gi.repository import Gio
+
+        source = Gio.SettingsSchemaSource.get_default()
+        if source is not None and source.lookup(_SCHEMA_ID, True) is not None:
+            settings = Gio.Settings(schema_id=_SCHEMA_ID)
+            val = settings.get_string("wine-prefix")
+            if val:
+                return Path(val).expanduser()
+    except Exception:
+        pass
+    return Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "wineprefix"
+
 
 def set_image_from_file(image: Gtk.Image, path: str) -> None:
     """Load a file into a Gtk.Image via GdkTexture"""
@@ -30,11 +47,7 @@ class ZLibCardData:
     publisher: str | None = None
     tags: list[str] | None = None
     arguments: list[str] | None = None
-    wine_prefix: Path = field(
-        default_factory=lambda: (
-            Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "wineprefix"
-        )
-    )
+    wine_prefix: Path = field(default_factory=_default_wine_prefix)
     running: bool = False
     launch_count: int = 0
     log_buffer: Gtk.TextBuffer = field(default_factory=Gtk.TextBuffer)

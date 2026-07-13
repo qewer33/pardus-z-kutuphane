@@ -21,6 +21,7 @@ from .add_book_dialog import ZLibAddBookDialog
 from .card import ZLibCard, ZLibCardData
 from .card_view import ZLibCardView
 from .log_window import LogWindow
+from .preferences_dialog import PreferencesDialog
 from .type_pill import ZLibTypePill
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
     "ZLibCardView",
     "LogWindow",
     "ZLibAddBookDialog",
+    "PreferencesDialog",
     "ZLibTypePill",
 ]
