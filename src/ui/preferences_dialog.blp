@@ -9,17 +9,6 @@ template $PreferencesDialog: Adw.PreferencesDialog {
     Adw.PreferencesGroup {
       title: _("Yollar");
 
-      Adw.EntryRow wine_prefix_row {
-        title: _("Wine Prefix");
-        show-apply-button: true;
-
-        [suffix]
-        Gtk.Button wine_prefix_browse {
-          icon-name: "folder-open-symbolic";
-          tooltip-text: _("Select Directory");
-        }
-      }
-
       Adw.EntryRow log_dir_row {
         title: _("Günce Dizini");
         show-apply-button: true;
@@ -39,6 +28,70 @@ template $PreferencesDialog: Adw.PreferencesDialog {
         Gtk.Button cache_dir_browse {
           icon-name: "folder-open-symbolic";
           tooltip-text: _("Dizin Seçiniz");
+        }
+      }
+    }
+  }
+
+  Adw.PreferencesPage {
+    title: _("Wine");
+    icon-name: "applications-engineering-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("Prefix");
+
+      Adw.EntryRow wine_prefix_row {
+        title: _("Wine Prefix Dizini");
+        show-apply-button: true;
+
+        [suffix]
+        Gtk.Button wine_prefix_browse {
+          icon-name: "folder-open-symbolic";
+          tooltip-text: _("Dizin Seç");
+        }
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Araçlar");
+
+      Adw.ActionRow winecfg_row {
+        title: _("Winecfg");
+        subtitle: _("Wine yapılandırma aracı");
+
+        [suffix]
+        Gtk.Button winecfg_btn {
+          label: _("Çalıştır");
+        }
+      }
+
+      Adw.ActionRow regedit_row {
+        title: _("Regedit");
+        subtitle: _("Kayıt defteri düzenleyicisi");
+
+        [suffix]
+        Gtk.Button regedit_btn {
+          label: _("Çalıştır");
+        }
+      }
+
+      Adw.ActionRow wineboot_row {
+        title: _("Wineboot");
+        subtitle: _("Wine'ı yeniden başlat");
+
+        [suffix]
+        Gtk.Button wineboot_btn {
+          label: _("Yeniden Başlat");
+        }
+      }
+
+      Adw.ActionRow open_prefix_row {
+        title: _("Prefix Dizini Aç");
+        subtitle: _("Dosya yöneticisinde aç");
+
+        [suffix]
+        Gtk.Button open_prefix_btn {
+          label: _("Aç");
         }
       }
     }

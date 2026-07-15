@@ -91,3 +91,8 @@ actionbar menubutton {
     padding-top: 2px;
     padding-bottom: 2px;
 }
+
+/* preferences dialog page tabs: spacing between icon and label */
+viewswitcher box.horizontal > label:last-child {
+    margin-left: 8px;
+}
