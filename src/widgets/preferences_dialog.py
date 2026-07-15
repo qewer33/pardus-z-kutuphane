@@ -13,6 +13,7 @@ class PreferencesDialog(Adw.PreferencesDialog):
 
     __gtype_name__ = "PreferencesDialog"
 
+    sort_switch = Gtk.Template.Child()
     wine_prefix_row = Gtk.Template.Child()
     log_dir_row = Gtk.Template.Child()
     cache_dir_row = Gtk.Template.Child()
@@ -30,6 +31,9 @@ class PreferencesDialog(Adw.PreferencesDialog):
         # load GSettings and bind preferences rows
         self._settings = Gio.Settings(schema_id=SCHEMA_ID)
 
+        self._settings.bind(
+            "sort-by-launch-count", self.sort_switch, "active", Gio.SettingsBindFlags.DEFAULT
+        )
         self._settings.bind(
             "wine-prefix", self.wine_prefix_row, "text", Gio.SettingsBindFlags.DEFAULT
         )
@@ -92,7 +96,7 @@ class PreferencesDialog(Adw.PreferencesDialog):
         if initial.exists():
             folder_dialog.set_initial_folder(Gio.File.new_for_path(str(initial)))
         folder_dialog.select_folder(
-            self, None, lambda d, r: self._on_folder_selected(d, r, row)
+            self.get_root(), None, lambda d, r: self._on_folder_selected(d, r, row)
         )
 
     def _on_folder_selected(

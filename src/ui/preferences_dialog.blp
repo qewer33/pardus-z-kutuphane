@@ -7,6 +7,15 @@ template $PreferencesDialog: Adw.PreferencesDialog {
     icon-name: "preferences-system-symbolic";
 
     Adw.PreferencesGroup {
+      title: _("Sıralama");
+
+      Adw.SwitchRow sort_switch {
+        title: _("Kullanım sayısına göre sırala");
+        subtitle: _("Kitapları en çok kullanılan en üstte olacak şekilde sıralar");
+      }
+    }
+
+    Adw.PreferencesGroup {
       title: _("Yollar");
 
       Adw.EntryRow log_dir_row {

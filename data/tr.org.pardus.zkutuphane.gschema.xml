@@ -28,5 +28,10 @@
 			<summary>Cache directory</summary>
 			<description>Directory for cached data such as publisher icons.</description>
 		</key>
+		<key name="sort-by-launch-count" type="b">
+			<default>true</default>
+			<summary>Sort by launch count</summary>
+			<description>Whether to sort books by the amount of times they have been launched.</description>
+		</key>
 	</schema>
 </schemalist>

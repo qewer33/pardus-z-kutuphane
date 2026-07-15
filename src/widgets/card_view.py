@@ -22,6 +22,8 @@ from gi.repository import Gio, GObject, Gtk
 from ..util.normalizer import Normalizer
 from .card import ZLibCard, ZLibCardData
 
+_SCHEMA_ID = "tr.org.pardus.zkutuphane"
+
 
 class ZLibCardItem(GObject.Object):
     """Thin GObject wrapper so ZLibCardData can live in a Gio.ListStore"""
@@ -31,6 +33,16 @@ class ZLibCardItem(GObject.Object):
     def __init__(self, data: ZLibCardData):
         super().__init__()
         self.data = data
+
+
+def _sort_enabled_by_default() -> bool:
+    try:
+        source = Gio.SettingsSchemaSource.get_default()
+        if source is not None and source.lookup(_SCHEMA_ID, True) is not None:
+            return Gio.Settings(schema_id=_SCHEMA_ID).get_boolean("sort-by-launch-count")
+    except Exception:
+        pass
+    return True
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card_view.ui")
@@ -55,6 +67,7 @@ class ZLibCardView(Gtk.FlowBox):
         self._search_text = ""
         self._publishers: set[str] = set()
         self._tags: set[str] = set()
+        self._sort_enabled = _sort_enabled_by_default()
         self._filter = Gtk.CustomFilter.new(self._match)
         self._filter_model = Gtk.FilterListModel.new(self.store, self._filter)
         self._sorter = Gtk.CustomSorter.new(self._sort_by_launch_count)
@@ -63,6 +76,15 @@ class ZLibCardView(Gtk.FlowBox):
         self.store.connect("items-changed", lambda *_: self.emit("library-changed"))
 
         self.connect("selected-children-changed", self._on_selection_changed)
+
+        # watch for sort preference changes at runtime
+        try:
+            source = Gio.SettingsSchemaSource.get_default()
+            if source is not None and source.lookup(_SCHEMA_ID, True) is not None:
+                settings = Gio.Settings(schema_id=_SCHEMA_ID)
+                settings.connect("changed::sort-by-launch-count", self._on_sort_setting)
+        except Exception:
+            pass
 
     @property
     def cards_data_list(self) -> list[ZLibCardData]:
@@ -100,7 +122,13 @@ class ZLibCardView(Gtk.FlowBox):
 
         return True
 
+    def _on_sort_setting(self, settings: Gio.Settings, _key: str) -> None:
+        self._sort_enabled = settings.get_boolean("sort-by-launch-count")
+        self._sorter.changed(Gtk.SorterChange.DIFFERENT)
+
     def _sort_by_launch_count(self, a: ZLibCardItem, b: ZLibCardItem, _user_data=None) -> int:
+        if not self._sort_enabled:
+            return 0
         return b.data.launch_count - a.data.launch_count
 
     def invalidate_sort(self) -> None:
