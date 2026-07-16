@@ -33,3 +33,27 @@ Sağ üstte bulunan **arama ikonuna** tıklanınca yukarıdan aılan **arama çu
 ## Geliştirme ve Altyapı
 
 Proje Meson build sistemini kullanmaktadır. Uygulama, kök dizinindeki `./run.sh` scriptini çalıştırarak çalıştırılabilir.
+
+### Derleme Bağımlılıkları
+
+| Bağımlılık | Açıklama |
+|---|---|
+| `meson` (>= 1.0.0) | Build sistemi |
+| `ninja-build` | Meson tarafından kullanılan derleyici |
+| `blueprint-compiler` | `.blp` arayüz dosyalarını derlemek için |
+| `libglib2.0-dev-bin` | GSettings şeması derlemek için (`glib-compile-schemas`) |
+| `libglib2.0-bin` | GLib çalışma zamanı araçları |
+| `desktop-file-utils` | `.desktop` dosyasını doğrulamak için |
+| `appstream` | AppStream metainfo dosyasını doğrulamak için |
+| `gettext` | Çeviri dosyalarını (`po/`) işlemek için |
+
+### Çalışma Zamanı Bağımlılıkları
+
+| Bağımlılık | Açıklama |
+|---|---|
+| `python3` | Uygulama çalışma zamanı |
+| `python3-gi` | GTK ve Adwaita Python bağlantıları (PyGObject) |
+| `gir1.2-gtk-4.0` (>= 4.14) | GTK 4 arayüz kütüphanesi |
+| `gir1.2-adw-1` (>= 1.5) | Adwaita stil ve bileşen kütüphanesi |
+| `python3-filetype` | Dosya türü tespiti için |
+| `wine` | Windows `.exe` dosyalarını çalıştırmak için |
