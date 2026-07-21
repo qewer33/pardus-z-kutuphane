@@ -52,17 +52,17 @@ template $ZLibAppWindow: Gtk.ApplicationWindow {
       }
 
       [end]
-      Gtk.ToggleButton search_btn {
-        icon-name: "system-search-symbolic";
-        tooltip-text: _("Ara");
-      }
-
-      [end]
       Gtk.MenuButton hamburger {
         icon-name: "open-menu-symbolic";
         tooltip-text: _("Main Menu");
         menu-model: primary_menu;
         primary: true;
+      }
+
+	  [end]
+      Gtk.ToggleButton search_btn {
+        icon-name: "system-search-symbolic";
+        tooltip-text: _("Ara");
       }
     }
 
