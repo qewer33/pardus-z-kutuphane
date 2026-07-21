@@ -101,8 +101,20 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self._bind_window_size()
 
         # setup drag & drop
-        drop_target = Gtk.DropTarget.new(type=Gdk.FileList, actions=Gdk.DragAction.COPY)
-        drop_target.connect("drop", self.on_file_drop)
+        # Wayland (GTK 4.22+): DropTargetAsync + read_value_async(Gdk.FileList)
+        # X11   (GTK 4.8):     DropTarget + G_TYPE_STRING — synchronous
+        #                        text/uri-list delivery; assert warnings
+        #                        are benign GTK 4.8 X11 bugs (#3755)
+        if Gtk.get_minor_version() >= 10:
+            formats = Gdk.ContentFormats.new_for_gtype(Gdk.FileList.__gtype__)
+            drop_target = Gtk.DropTargetAsync.new(formats, Gdk.DragAction.COPY)
+            drop_target.connect("accept", self._on_drop_accept)
+            drop_target.connect("drop", self._on_drop_sync)
+        else:
+            drop_target = Gtk.DropTarget.new(GObject.TYPE_STRING,
+                                             Gdk.DragAction.COPY)
+            drop_target.connect("accept", self._on_drop_accept)
+            drop_target.connect("drop", self._on_drop_string)
         self.add_controller(drop_target)
 
         # setup search
@@ -339,18 +351,86 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         dialog.destroy()
         self._file_dialog = None
 
-    def on_file_drop(self, drop_target, file_list, x, y):
-        if not isinstance(file_list, Gdk.FileList):
-            return
+    def _on_drop_accept(self, target, drop):
+        return True
 
-        files = list(file_list)
-        for file in files:
-            card_data = self._card_from_file(file.get_path())
-            # don't show dialog for multiple files
-            if len(files) == 1:
-                self._show_add_book_dialog(card_data)
-            else:
-                self.add_card(card_data)
+    def _on_drop_sync(self, target, drop, x, y):
+        drop.read_value_async(Gdk.FileList.__gtype__,
+                              GLib.PRIORITY_DEFAULT, None,
+                              self._on_drop_file_read, None)
+        drop.finish(Gdk.DragAction.COPY)
+        return True
+
+    def _on_drop_file_read(self, drop, result, user_data):
+        try:
+            flist = drop.read_value_finish(result)
+        except GLib.GError:
+            return
+        if flist is None:
+            return
+        try:
+            files = list(flist)
+        except TypeError:
+            files = self._extract_files_ctypes(flist) or []
+        if files:
+            for file in files:
+                card_data = self._card_from_file(file.get_path())
+                if len(files) == 1:
+                    self._show_add_book_dialog(card_data)
+                else:
+                    self.add_card(card_data)
+
+    def _on_drop_string(self, target, value, x, y):
+        text = value.get_string() if isinstance(value, GObject.Value) else value
+        if not text:
+            return False
+        files = []
+        for line in text.splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                files.append(Gio.File.new_for_uri(line))
+        if files:
+            for file in files:
+                card_data = self._card_from_file(file.get_path())
+                if len(files) == 1:
+                    self._show_add_book_dialog(card_data)
+                else:
+                    self.add_card(card_data)
+        return True
+
+    @staticmethod
+    def _extract_files_ctypes(flist):
+        import re, ctypes
+        try:
+            m = re.search(r"GdkFileList at (0x[0-9a-f]+)", repr(flist))
+            if not m:
+                return None
+            addr = int(m.group(1), 16)
+            slist_ptr = ctypes.cast(addr, ctypes.POINTER(ctypes.c_void_p))[0]
+            if not slist_ptr:
+                return None
+
+            libgio = ctypes.CDLL("libgio-2.0.so")
+            libgio.g_file_get_path.argtypes = [ctypes.c_void_p]
+            libgio.g_file_get_path.restype = ctypes.c_char_p
+            libgio.g_free.argtypes = [ctypes.c_void_p]
+            libgio.g_free.restype = None
+
+            files = []
+            while slist_ptr:
+                fields = ctypes.cast(slist_ptr, ctypes.POINTER(ctypes.c_void_p * 2))[0]
+                gfile_ptr, next_ptr = fields[0], fields[1]
+                if gfile_ptr:
+                    path_ptr = libgio.g_file_get_path(gfile_ptr)
+                    if path_ptr:
+                        path = ctypes.cast(path_ptr, ctypes.c_char_p).value
+                        if path:
+                            files.append(Gio.File.new_for_path(path))
+                        libgio.g_free(path_ptr)
+                slist_ptr = next_ptr
+            return files
+        except Exception:
+            return None
 
     def _card_from_file(self, path: str) -> ZLibCardData:
         type = TypeDetector.get_executable_type(path)
