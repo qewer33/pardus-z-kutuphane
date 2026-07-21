@@ -1,67 +1,74 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $PreferencesDialog: Adw.PreferencesDialog {
-  Adw.PreferencesPage {
+template $PreferencesDialog: Adw.PreferencesWindow {
+  Adw.PreferencesPage genel_page {
     title: _("Genel");
-    icon-name: "preferences-system-symbolic";
 
-    Adw.PreferencesGroup {
+    Adw.PreferencesGroup sort_group {
       title: _("Sıralama");
 
-      Adw.SwitchRow sort_switch {
+      Adw.ActionRow _sort_row {
         title: _("Kullanım sayısına göre sırala");
         subtitle: _("Kitapları en çok kullanılan en üstte olacak şekilde sıralar");
+        activatable-widget: _sort_switch;
+
+        [suffix]
+        Gtk.Switch _sort_switch {
+          valign: center;
+        }
       }
     }
 
-    Adw.PreferencesGroup {
+    Adw.PreferencesGroup paths_group {
       title: _("Yollar");
 
-      Adw.EntryRow log_dir_row {
+      Adw.EntryRow _log_dir_row {
         title: _("Günce Dizini");
-        show-apply-button: true;
 
         [suffix]
-        Gtk.Button log_dir_browse {
-          icon-name: "folder-open-symbolic";
+        Gtk.Button _log_dir_browse {
           tooltip-text: _("Dizin seçiniz");
+          child: Gtk.Image {
+            icon-name: "folder-open-symbolic";
+          };
         }
       }
 
-      Adw.EntryRow cache_dir_row {
+      Adw.EntryRow _cache_dir_row {
         title: _("Önbellek Dizini");
-        show-apply-button: true;
 
         [suffix]
-        Gtk.Button cache_dir_browse {
-          icon-name: "folder-open-symbolic";
+        Gtk.Button _cache_dir_browse {
           tooltip-text: _("Dizin Seçiniz");
+          child: Gtk.Image {
+            icon-name: "folder-open-symbolic";
+          };
         }
       }
     }
   }
 
-  Adw.PreferencesPage {
+  Adw.PreferencesPage wine_page {
     title: _("Wine");
-    icon-name: "applications-engineering-symbolic";
 
-    Adw.PreferencesGroup {
+    Adw.PreferencesGroup prefix_group {
       title: _("Prefix");
 
-      Adw.EntryRow wine_prefix_row {
+      Adw.EntryRow _wine_prefix_row {
         title: _("Wine Prefix Dizini");
-        show-apply-button: true;
 
         [suffix]
-        Gtk.Button wine_prefix_browse {
-          icon-name: "folder-open-symbolic";
+        Gtk.Button _wine_prefix_browse {
           tooltip-text: _("Dizin Seç");
+          child: Gtk.Image {
+            icon-name: "folder-open-symbolic";
+          };
         }
       }
     }
 
-    Adw.PreferencesGroup {
+    Adw.PreferencesGroup tools_group {
       title: _("Araçlar");
 
       Adw.ActionRow winecfg_row {
@@ -69,7 +76,7 @@ template $PreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Wine yapılandırma aracı");
 
         [suffix]
-        Gtk.Button winecfg_btn {
+        Gtk.Button _winecfg_btn {
           label: _("Çalıştır");
         }
       }
@@ -79,7 +86,7 @@ template $PreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Kayıt defteri düzenleyicisi");
 
         [suffix]
-        Gtk.Button regedit_btn {
+        Gtk.Button _regedit_btn {
           label: _("Çalıştır");
         }
       }
@@ -89,7 +96,7 @@ template $PreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Wine'ı yeniden başlat");
 
         [suffix]
-        Gtk.Button wineboot_btn {
+        Gtk.Button _wineboot_btn {
           label: _("Yeniden Başlat");
         }
       }
@@ -99,7 +106,7 @@ template $PreferencesDialog: Adw.PreferencesDialog {
         subtitle: _("Dosya yöneticisinde aç");
 
         [suffix]
-        Gtk.Button open_prefix_btn {
+        Gtk.Button _open_prefix_btn {
           label: _("Aç");
         }
       }

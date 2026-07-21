@@ -19,8 +19,8 @@ Architecture: all
 Depends: ${misc:Depends},
          python3,
          python3-gi,
-         gir1.2-gtk-4.0 (>= 4.14),
-         gir1.2-adw-1 (>= 1.5),
+          gir1.2-gtk-4.0 (>= 4.8),
+          gir1.2-adw-1 (>= 1.2),
          python3-filetype,
          wine
 Description: Pardus Z-Kütüphane

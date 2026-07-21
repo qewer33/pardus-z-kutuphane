@@ -38,8 +38,8 @@ class LogWindow(Adw.Window):
 
         scrolled = Gtk.ScrolledWindow(child=text_view, vexpand=True)
 
-        toolbar_view = Adw.ToolbarView()
-        toolbar_view.add_top_bar(Adw.HeaderBar())
-        toolbar_view.set_content(scrolled)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.append(Adw.HeaderBar())
+        box.append(scrolled)
 
-        self.set_content(toolbar_view)
+        self.set_content(box)

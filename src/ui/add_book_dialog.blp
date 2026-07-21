@@ -1,12 +1,12 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $ZLibAddBookDialog: Adw.Dialog {
+template $ZLibAddBookDialog: Adw.Window {
   title: _("Kitap Ekle");
-  content-width: 420;
 
-  child: Adw.ToolbarView {
-    [top]
+  content: Gtk.Box {
+    orientation: vertical;
+
     Adw.HeaderBar {
       show-start-title-buttons: false;
       show-end-title-buttons: false;
@@ -26,7 +26,7 @@ template $ZLibAddBookDialog: Adw.Dialog {
       }
     }
 
-    content: Gtk.Box {
+    Gtk.Box {
       orientation: vertical;
       spacing: 18;
       margin-top: 12;
@@ -144,6 +144,6 @@ template $ZLibAddBookDialog: Adw.Dialog {
           }
         }
       }
-    };
+    }
   };
 }

@@ -26,7 +26,7 @@ _CATEGORY_INDEX = {
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/add_book_dialog.ui")
-class ZLibAddBookDialog(Adw.Dialog):
+class ZLibAddBookDialog(Adw.Window):
     """Dialog to review a book's metadata before adding it to the library"""
 
     __gtype_name__ = "ZLibAddBookDialog"
@@ -59,6 +59,8 @@ class ZLibAddBookDialog(Adw.Dialog):
         self.is_web = card_data.type == ExecutableType.WEBBOOK
 
         self.set_title(title)
+        self.set_modal(True)
+        self.set_default_size(420, -1)
         self.add_button.set_label(confirm_label)
 
         # tags
@@ -104,6 +106,11 @@ class ZLibAddBookDialog(Adw.Dialog):
         self.tag_search_entry.connect("search-changed", self._on_popup_search)
         self.tag_search_flowbox.connect("child-activated", self._on_popup_row_activated)
         self.tag_search_entry.connect("activate", self._on_popup_add)
+
+    def present(self, parent=None):
+        if parent is not None:
+            self.set_transient_for(parent)
+        super().present()
 
     def _rebuild_tag_pills(self) -> None:
         child = self.tag_flowbox.get_first_child()

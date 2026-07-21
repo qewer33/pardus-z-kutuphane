@@ -1,58 +1,71 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $ZLibAppWindow: Adw.ApplicationWindow {
+menu add_menu {
+  section {
+    item { label: _("Dosya Ekle"); action: "win.open-file"; }
+    item { label: _("Bağlantı Ekle"); action: "win.add-link"; }
+  }
+}
+
+menu primary_menu {
+  section {
+    item { label: _("_Preferences"); action: "app.preferences"; }
+    item { label: _("_Keyboard Shortcuts"); action: "app.shortcuts"; }
+    item { label: _("_About Pardus Z-Kütüphane"); action: "app.about"; }
+  }
+}
+
+menu card_actions_menu {
+  section {
+    item { label: _("Düzenle"); action: "win.configure-card"; }
+    item { label: _("Günce"); action: "win.show-log-card"; }
+  }
+  section {
+    item { label: _("Kaldır"); action: "win.remove-card"; }
+  }
+}
+
+template $ZLibAppWindow: Gtk.ApplicationWindow {
   title: _("Pardus Z-Kütüphane");
   default-width: 800;
   default-height: 600;
 
-  content: Adw.ToolbarView {
-    bottom-bar-style: raised;
+  child: Gtk.Box {
+    orientation: vertical;
 
-    [top]
-    Adw.HeaderBar {
+    Gtk.HeaderBar header_bar {
       [start]
       Gtk.MenuButton add_button {
-        styles [
-          "flat",
-        ]
-
         tooltip-text: _("Ekle");
         menu-model: add_menu;
-
         child: Gtk.Box {
           margin-top: 4;
           margin-bottom: 4;
           margin-start: 6;
           margin-end: 6;
           spacing: 6;
-
-          Gtk.Image {
-            icon-name: "list-add-symbolic";
-          }
-
-          Gtk.Label {
-            label: _("Ekle");
-          }
+          Gtk.Image { icon-name: "list-add-symbolic"; }
+          Gtk.Label { label: _("Ekle"); }
         };
+        styles ["flat"]
       }
 
       [end]
-      Gtk.MenuButton {
-        primary: true;
-        icon-name: "open-menu-symbolic";
-        tooltip-text: _("Main Menu");
-        menu-model: primary_menu;
-      }
-
-      [end]
-      Gtk.ToggleButton search_button {
+      Gtk.ToggleButton search_btn {
         icon-name: "system-search-symbolic";
         tooltip-text: _("Ara");
       }
+
+      [end]
+      Gtk.MenuButton hamburger {
+        icon-name: "open-menu-symbolic";
+        tooltip-text: _("Main Menu");
+        menu-model: primary_menu;
+        primary: true;
+      }
     }
 
-    [top]
     Gtk.SearchBar search_bar {
       Gtk.Box {
         orientation: horizontal;
@@ -63,7 +76,7 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
         Gtk.SearchEntry search_entry {
           hexpand: true;
           placeholder-text: _("Z-Kitap ara...");
-		  tooltip-text : _("İsime Göre Ara");
+ 		  tooltip-text : _("İsime Göre Ara");
         }
 
         Gtk.MenuButton search_publisher_btn {
@@ -132,7 +145,29 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
       }
     }
 
-    [bottom]
+    Gtk.Stack card_stack {
+      hexpand: true;
+      vexpand: true;
+      Gtk.StackPage {
+        name: "empty";
+
+        child: Adw.StatusPage {
+          icon-name: "tr.org.pardus.zkutuphane-symbolic";
+          title: _("Kütüphane Boş");
+          description: _("Başlamak için bir Z-Kitap uygulaması ekleyin veya buraya sürükleyin");
+          vexpand: true;
+        };
+      }
+
+      Gtk.StackPage {
+        name: "cards";
+
+        child: Gtk.ScrolledWindow {
+          $ZLibCardView card_view {}
+        };
+      }
+    }
+
     Gtk.ActionBar card_action_bar {
       revealed: false;
 
@@ -204,80 +239,5 @@ template $ZLibAppWindow: Adw.ApplicationWindow {
         vexpand: false;
       }
     }
-
-    content: Gtk.Stack card_stack {
-      Gtk.StackPage {
-        name: "empty";
-
-        child: Adw.StatusPage {
-          icon-name: "tr.org.pardus.zkutuphane-symbolic";
-          title: _("Kütüphane Boş");
-          description: _("Başlamak için bir Z-Kitap uygulaması ekleyin veya buraya sürükleyin");
-          vexpand: true;
-        };
-      }
-
-      Gtk.StackPage {
-        name: "cards";
-
-        child: Gtk.ScrolledWindow {
-          $ZLibCardView card_view {}
-        };
-      }
-    };
   };
-}
-
-menu add_menu {
-  section {
-    item {
-      label: _("Dosya Ekle");
-      action: "win.open-file";
-    }
-
-    item {
-      label: _("Bağlantı Ekle");
-      action: "win.add-link";
-    }
-  }
-}
-
-menu card_actions_menu {
-  section {
-    item {
-      label: _("Düzenle");
-      action: "win.configure-card";
-    }
-
-    item {
-      label: _("Günce");
-      action: "win.show-log-card";
-    }
-  }
-
-  section {
-    item {
-      label: _("Kaldır");
-      action: "win.remove-card";
-    }
-  }
-}
-
-menu primary_menu {
-  section {
-    item {
-      label: _("_Preferences");
-      action: "app.preferences";
-    }
-
-    item {
-      label: _("_Keyboard Shortcuts");
-      action: "app.shortcuts";
-    }
-
-    item {
-      label: _("_About Pardus Z-Kütüphane");
-      action: "app.about";
-    }
-  }
 }

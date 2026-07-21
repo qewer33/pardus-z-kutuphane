@@ -20,6 +20,7 @@
 import json
 import os
 import threading
+from gettext import gettext as _
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -47,7 +48,7 @@ LIBRARY_FILE = (
 
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
-class ZLibAppWindow(Adw.ApplicationWindow):
+class ZLibAppWindow(Gtk.ApplicationWindow):
     """Main application window"""
 
     __gtype_name__ = "ZLibAppWindow"
@@ -58,7 +59,6 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     card_selected_label = Gtk.Template.Child()
     tag_pill_container = Gtk.Template.Child()
     pill_container = Gtk.Template.Child()
-    search_button = Gtk.Template.Child()
     search_bar = Gtk.Template.Child()
     search_entry = Gtk.Template.Child()
     search_publisher_btn = Gtk.Template.Child()
@@ -69,9 +69,24 @@ class ZLibAppWindow(Adw.ApplicationWindow):
     publisher_filter_list = Gtk.Template.Child()
     tag_filter_search = Gtk.Template.Child()
     tag_filter_list = Gtk.Template.Child()
+    search_btn = Gtk.Template.Child()
+    add_button = Gtk.Template.Child()
+    hamburger = Gtk.Template.Child()
+    header_bar = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.search_btn.bind_property(
+            "active", self.search_bar, "search-mode-enabled",
+            GObject.BindingFlags.BIDIRECTIONAL,
+        )
+
+        # On Wayland CSD is native, so promote our header bar to the real titlebar.
+        box = self.get_child()
+        if box is not None:
+            box.remove(self.header_bar)
+        self.set_titlebar(self.header_bar)
 
         provider = Gtk.CssProvider()
         provider.load_from_resource("/tr/org/pardus/zkutuphane/style.css")
@@ -92,12 +107,6 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         # setup search
 
-        self.search_button.bind_property(
-            "active",
-            self.search_bar,
-            "search-mode-enabled",
-            GObject.BindingFlags.BIDIRECTIONAL,
-        )
         self.search_bar.connect_entry(self.search_entry)
         self.search_bar.set_key_capture_widget(self)
         self.search_entry.connect("search-changed", self.on_search_changed)
@@ -272,20 +281,30 @@ class ZLibAppWindow(Adw.ApplicationWindow):
         dialog.present()
 
     def on_open_folder_clicked(self, _button: Gtk.Button):
+        logger.info("on_open_folder_clicked called (gtk=%s.%s)", Gtk.get_major_version(), Gtk.get_minor_version())
+        try:
+            if Gtk.get_major_version() >= 4 and Gtk.get_minor_version() >= 10:
+                self._open_file_async()
+            else:
+                self._open_file_native()
+        except Exception as e:
+            logger.error("on_open_folder_clicked error: %s", e, exc_info=True)
+            import traceback
+            traceback.print_exc()
+
+    def _open_file_async(self):
         try:
             dialog = Gtk.FileDialog()
             dialog.set_title("Bir Z-Kitap Uygulaması Seçin...")
-            dialog.open(self, None, self.on_folder_chosen)
+            dialog.open(self, None, self._on_file_chosen_async)
         except GLib.Error as e:
             logger.error("FileDialog error: %s %s %s", e.message, e.domain, e.code)
             return
 
-    # file open signal handlers
-    def on_folder_chosen(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
+    def _on_file_chosen_async(self, dialog, result):
         try:
             file = dialog.open_finish(result)
         except GLib.Error as e:
-            # user dismiss
             if e.matches(Gtk.DialogError.quark(), Gtk.DialogError.DISMISSED):
                 return
             logger.error("FileDialog error: %s %s %s", e.message, e.domain, e.code)
@@ -295,6 +314,30 @@ class ZLibAppWindow(Adw.ApplicationWindow):
 
         card_data = self._card_from_file(file.get_path())
         self._show_add_book_dialog(card_data)
+
+    def _open_file_native(self):
+        logger.info("Opening Gtk.FileChooserNative...")
+        try:
+            self._file_dialog = Gtk.FileChooserNative.new(
+                "Bir Z-Kitap Uygulaması Seçin...",
+                self,
+                Gtk.FileChooserAction.OPEN,
+                None, None,
+            )
+            self._file_dialog.connect("response", self._on_file_chosen_native)
+            self._file_dialog.show()
+        except Exception as e:
+            logger.error("FileChooserNative error: %s", e)
+
+    def _on_file_chosen_native(self, dialog, response):
+        logger.info("FileChooserNative response: %s", response)
+        if response == Gtk.ResponseType.ACCEPT:
+            file = dialog.get_file()
+            if file is not None:
+                card_data = self._card_from_file(file.get_path())
+                self._show_add_book_dialog(card_data)
+        dialog.destroy()
+        self._file_dialog = None
 
     def on_file_drop(self, drop_target, file_list, x, y):
         if not isinstance(file_list, Gdk.FileList):
@@ -419,9 +462,14 @@ class ZLibAppWindow(Adw.ApplicationWindow):
             self.tag_pill_container.append(label)
 
     def _show_error(self, heading: str, body: str) -> None:
-        dialog = Adw.AlertDialog(heading=heading, body=body)
-        dialog.add_response("ok", "Tamam")
-        dialog.present(self)
+        if hasattr(Adw, "AlertDialog"):
+            dialog = Adw.AlertDialog(heading=heading, body=body)
+            dialog.add_response("ok", "Tamam")
+            dialog.present(self)
+        else:
+            dialog = Adw.MessageDialog(transient_for=self, heading=heading, body=body)
+            dialog.add_response("ok", "Tamam")
+            dialog.present()
 
     def on_configure_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()

@@ -40,9 +40,55 @@ class PardusZKutuphaneApplication(Adw.Application):
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
             resource_base_path="/tr/org/pardus/zkutuphane",
         )
+        self._setup_style()
         self.create_action("quit", lambda *_: self.quit(), ["<control>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
+
+    def _setup_style(self):
+        # Follow the system light/dark preference explicitly. libadwaita's
+        # automatic detection relies on the xdg-desktop-portal settings, which
+        # is often unavailable on X11 sessions (e.g. Pardus/GNOME X11), causing
+        # the app to ignore the system color-scheme and stay light. Reading
+        # org.gnome.desktop.interface directly keeps the app in sync everywhere.
+        style_manager = Adw.StyleManager.get_default()
+        try:
+            settings = Gio.Settings.new("org.gnome.desktop.interface")
+        except Exception:
+            return
+
+        # Accessing a missing key is a fatal GLib error, so probe the schema
+        # first. The legacy boolean key was dropped from newer schemas.
+        try:
+            keys = settings.list_keys()
+        except Exception:
+            return
+
+        has_legacy = "gtk-application-prefer-dark-theme" in keys
+        has_scheme = "color-scheme" in keys
+
+        def apply():
+            prefer_dark = False
+            if has_legacy:
+                prefer_dark = settings.get_boolean("gtk-application-prefer-dark-theme")
+            if prefer_dark:
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+                return
+            scheme = settings.get_string("color-scheme") if has_scheme else "default"
+            if scheme == "prefer-dark":
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+            elif scheme == "prefer-light":
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+            else:
+                style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
+
+        apply()
+        if has_scheme:
+            settings.connect("changed::color-scheme", lambda *_: apply())
+        if has_legacy:
+            settings.connect(
+                "changed::gtk-application-prefer-dark-theme", lambda *_: apply()
+            )
 
     def do_activate(self):
         win = self.props.active_window
@@ -51,7 +97,8 @@ class PardusZKutuphaneApplication(Adw.Application):
         win.present()
 
     def on_about_action(self, *args):
-        about = Adw.AboutDialog(
+        about_cls = Adw.AboutDialog if hasattr(Adw, "AboutDialog") else Adw.AboutWindow
+        about = about_cls(
             application_name="Pardus Z-Kütüphane",
             application_icon="tr.org.pardus.zkutuphane",
             developer_name="Anadolu Penguenleri",
@@ -59,7 +106,13 @@ class PardusZKutuphaneApplication(Adw.Application):
             developers=["Yunus Erdem ERGÜL", "Murat YALÇIN"],
             copyright="© 2026 Anadolu Penguenleri",
         )
-        about.present(self.props.active_window)
+        parent = self.props.active_window
+        if isinstance(about, Adw.Dialog) if hasattr(Adw, "Dialog") else False:
+            about.present(parent)
+        else:
+            about.set_transient_for(parent)
+            about.set_modal(True)
+            about.present()
 
     def on_preferences_action(self, widget, _):
         dialog = PreferencesDialog()

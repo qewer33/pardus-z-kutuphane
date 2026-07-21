@@ -53,7 +53,7 @@ Proje Meson build sistemini kullanmaktadır. Uygulama, kök dizinindeki `./run.s
 |---|---|
 | `python3` | Uygulama çalışma zamanı |
 | `python3-gi` | GTK ve Adwaita Python bağlantıları (PyGObject) |
-| `gir1.2-gtk-4.0` (>= 4.14) | GTK 4 arayüz kütüphanesi |
-| `gir1.2-adw-1` (>= 1.5) | Adwaita stil ve bileşen kütüphanesi |
+| `gir1.2-gtk-4.0` (>= 4.8) | GTK 4 arayüz kütüphanesi |
+| `gir1.2-adw-1` (>= 1.2) | Adwaita stil ve bileşen kütüphanesi |
 | `python3-filetype` | Dosya türü tespiti için |
 | `wine` | Windows `.exe` dosyalarını çalıştırmak için |
