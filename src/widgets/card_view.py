@@ -45,6 +45,12 @@ def _sort_enabled_by_default() -> bool:
     return True
 
 
+def _sort_by_launch_count(a: ZLibCardItem, b: ZLibCardItem, view: 'ZLibCardView') -> int:
+    if not view._sort_enabled:
+        return 0
+    return b.data.launch_count - a.data.launch_count
+
+
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/card_view.ui")
 class ZLibCardView(Gtk.FlowBox):
     """Card view grid for library entries"""
@@ -70,7 +76,7 @@ class ZLibCardView(Gtk.FlowBox):
         self._sort_enabled = _sort_enabled_by_default()
         self._filter = Gtk.CustomFilter.new(self._match)
         self._filter_model = Gtk.FilterListModel.new(self.store, self._filter)
-        self._sorter = Gtk.CustomSorter.new(self._sort_by_launch_count)
+        self._sorter = Gtk.CustomSorter.new(_sort_by_launch_count, self)
         self._sort_model = Gtk.SortListModel.new(self._filter_model, self._sorter)
         self.bind_model(self._sort_model, self._create_card)
         self.store.connect("items-changed", lambda *_: self.emit("library-changed"))
@@ -124,15 +130,12 @@ class ZLibCardView(Gtk.FlowBox):
 
     def _on_sort_setting(self, settings: Gio.Settings, _key: str) -> None:
         self._sort_enabled = settings.get_boolean("sort-by-launch-count")
-        self._sorter.changed(Gtk.SorterChange.DIFFERENT)
-
-    def _sort_by_launch_count(self, a: ZLibCardItem, b: ZLibCardItem, _user_data=None) -> int:
-        if not self._sort_enabled:
-            return 0
-        return b.data.launch_count - a.data.launch_count
+        self._sorter = Gtk.CustomSorter.new(_sort_by_launch_count, self)
+        self._sort_model.set_sorter(self._sorter)
 
     def invalidate_sort(self) -> None:
-        self._sorter.changed(Gtk.SorterChange.DIFFERENT)
+        self._sorter = Gtk.CustomSorter.new(_sort_by_launch_count, self)
+        self._sort_model.set_sorter(self._sorter)
 
     def _create_card(self, item: ZLibCardItem) -> ZLibCard:
         return ZLibCard(item.data)
