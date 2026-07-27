@@ -47,26 +47,35 @@ class WineBackend:
         if sentinel.exists():
             return
 
-        # broken prefix, remoe it
+        # broken prefix, remove it
         if prefix.exists():
             logger.warning("Removing broken/incomplete wineprefix: %s", prefix)
             shutil.rmtree(prefix)
 
-        logger.info("Initializing wineprefix: WINEPREFIX=%s wineboot -i", prefix)
-
         prefix.mkdir(parents=True, exist_ok=True)
 
-        # initialize wine
-        result = subprocess.run(
-            ["wineboot", "-i"],
-            env=WineBackend._environment(prefix),
-        )
-
-        if result.returncode != 0 or not sentinel.exists():
-            raise WineError(
-                f"Failed to initialize wineprefix at {prefix} "
-                f"(wineboot exit code {result.returncode})."
+        # Try wineboot -u (update) first, which is more lenient than -i
+        # on older Wine / systems with missing dependencies.  Fall back
+        # to -i if that's not available.
+        for flag in ("-u", "-i"):
+            logger.info("Initializing wineprefix: WINEPREFIX=%s wineboot %s", prefix, flag)
+            result = subprocess.run(
+                ["wineboot", flag],
+                env=WineBackend._environment(prefix),
+                capture_output=True, text=True,
             )
+            if result.returncode == 0 and sentinel.exists():
+                return
+
+        raise WineError(
+            f"Failed to initialize wineprefix at {prefix}.\n"
+            f"  wineboot stderr: {result.stderr.strip()}\n"
+            f"  wineboot stdout: {result.stdout.strip()}\n"
+            f"  exit code: {result.returncode}\n\n"
+            "Try running 'wine winecfg' manually, or check that the "
+            "wine32 package is installed (dpkg --add-architecture i386 "
+            "&& apt install wine32)."
+        )
 
     @staticmethod
     def launch(

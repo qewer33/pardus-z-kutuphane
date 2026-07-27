@@ -473,6 +473,15 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         if card_data is None or card_data.running:
             return
 
+        # Use the current global wine prefix from GSettings, so that
+        # Preferences changes take effect immediately on next launch.
+        try:
+            val = Gio.Settings(schema_id="tr.org.pardus.zkutuphane").get_string("wine-prefix")
+            if val:
+                card_data.wine_prefix = Path(val).expanduser()
+        except Exception:
+            pass
+
         try:
             process = Launcher.launch(card_data)
         except Exception as e:
@@ -492,7 +501,8 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self._update_launch_action()
 
         def _wait():
-            for line in process.stdout:
+            for raw in process.stdout:
+                line = raw.decode("utf-8", errors="replace") if isinstance(raw, bytes) else raw
                 GLib.idle_add(self._append_log, card_data, line)
             process.wait()
             card_data.running = False
