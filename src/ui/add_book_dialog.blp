@@ -53,12 +53,96 @@ template $ZLibAddBookDialog: Adw.Window {
           title: _("Başlık");
         }
 
-        Adw.ComboRow publisher_row {
+        Adw.ActionRow publisher_row {
           title: _("Yayıncı");
+
+          [suffix]
+          Gtk.MenuButton publisher_dropdown_btn {
+            child: Gtk.Box {
+              spacing: 4;
+
+              Gtk.Label publisher_value_label {
+                css-classes: ["caption"];
+              }
+
+              Gtk.Image {
+                icon-name: "pan-down-symbolic";
+              }
+            };
+
+            popover: Gtk.Popover publisher_popover {
+              position: bottom;
+
+              Gtk.Box {
+                orientation: vertical;
+                spacing: 6;
+                margin-top: 6;
+                margin-bottom: 6;
+                margin-end: 6;
+
+                Gtk.SearchEntry publisher_search_entry {
+                  placeholder-text: _("Yayıncı Ara...");
+                }
+
+                Gtk.ScrolledWindow {
+                  valign: start;
+                  min-content-height: 200;
+                  max-content-height: 300;
+                  min-content-width: 200;
+
+                  Gtk.ListBox publisher_search_list {
+                    selection-mode: single;
+                  }
+                }
+              }
+            };
+
+            valign: center;
+          }
         }
 
-        Adw.ComboRow type_row {
+        Adw.ActionRow type_row {
           title: _("Tür");
+
+          [suffix]
+          Gtk.MenuButton type_dropdown_btn {
+            child: Gtk.Box {
+              spacing: 4;
+
+              Gtk.Label type_value_label {
+                css-classes: ["caption"];
+              }
+
+              Gtk.Image {
+                icon-name: "pan-down-symbolic";
+              }
+            };
+
+            popover: Gtk.Popover type_popover {
+              position: bottom;
+
+              Gtk.Box {
+                orientation: vertical;
+                spacing: 6;
+                margin-top: 6;
+                margin-bottom: 6;
+                margin-end: 6;
+
+                Gtk.ScrolledWindow {
+                  valign: start;
+                  min-content-height: 150;
+                  max-content-height: 250;
+                  min-content-width: 200;
+
+                  Gtk.ListBox type_search_list {
+                    selection-mode: single;
+                  }
+                }
+              }
+            };
+
+            valign: center;
+          }
         }
 
         Adw.PreferencesRow {

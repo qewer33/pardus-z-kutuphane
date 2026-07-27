@@ -35,7 +35,16 @@ class ZLibAddBookDialog(Adw.Window):
     book_icon_overlay = Gtk.Template.Child()
     title_row = Gtk.Template.Child()
     publisher_row = Gtk.Template.Child()
+    publisher_dropdown_btn = Gtk.Template.Child()
+    publisher_popover = Gtk.Template.Child()
+    publisher_search_entry = Gtk.Template.Child()
+    publisher_search_list = Gtk.Template.Child()
+    publisher_value_label = Gtk.Template.Child()
     type_row = Gtk.Template.Child()
+    type_dropdown_btn = Gtk.Template.Child()
+    type_popover = Gtk.Template.Child()
+    type_search_list = Gtk.Template.Child()
+    type_value_label = Gtk.Template.Child()
     cancel_button = Gtk.Template.Child()
     add_button = Gtk.Template.Child()
     tag_flowbox = Gtk.Template.Child()
@@ -60,7 +69,7 @@ class ZLibAddBookDialog(Adw.Window):
 
         self.set_title(title)
         self.set_modal(True)
-        self.set_default_size(420, -1)
+        self.set_default_size(420, 520)
         self.add_button.set_label(confirm_label)
 
         # tags
@@ -81,22 +90,25 @@ class ZLibAddBookDialog(Adw.Window):
 
         self.title_row.set_text(card_data.title)
 
-        # publisher dropdown
+        # publisher — ActionRow with searchable popover
         self._publishers = [UNKNOWN_PUBLISHER] + PublisherDetector.names()
-        self.publisher_row.set_model(Gtk.StringList.new(self._publishers))
-        if card_data.publisher in self._publishers:
-            self.publisher_row.set_selected(self._publishers.index(card_data.publisher))
+        self._selected_publisher = card_data.publisher or UNKNOWN_PUBLISHER
+        self.publisher_value_label.set_label(self._selected_publisher)
+        self.publisher_row.set_activatable_widget(self.publisher_dropdown_btn)
 
-        # type dropdown, locked to Web for web books, else launch categories
+        self.publisher_popover.connect("map", lambda _p: self._populate_publisher_search())
+        self.publisher_search_entry.connect("search-changed", self._on_publisher_search)
+        self.publisher_search_list.connect("row-activated", self._on_publisher_selected)
+
+        # type — ActionRow with popover
         self._categories = [_WEB_CATEGORY] if self.is_web else _FILE_CATEGORIES
-        labels = [label for label, _ in self._categories]
-        self.type_row.set_model(Gtk.StringList.new(labels))
-        if not self.is_web:
-            self.type_row.set_selected(_CATEGORY_INDEX.get(card_data.type, 0))
-        self.type_row.set_sensitive(not self.is_web)
+        self._selected_type_idx = 0 if self.is_web else _CATEGORY_INDEX.get(card_data.type, 0)
+        self.type_value_label.set_label(self._categories[self._selected_type_idx][0])
+        self.type_row.set_activatable_widget(self.type_dropdown_btn)
+        self.type_dropdown_btn.set_sensitive(not self.is_web)
 
-        # tint the book cover to match the selected type, live
-        self.type_row.connect("notify::selected", self._on_type_changed)
+        self.type_popover.connect("map", lambda _p: self._populate_type_search())
+        self.type_search_list.connect("row-activated", self._on_type_selected)
         self._update_book_image()
 
         self.cancel_button.connect("clicked", lambda _button: self.close())
@@ -180,13 +192,63 @@ class ZLibAddBookDialog(Adw.Window):
             self._rebuild_tag_pills()
         self.tag_add_popover.popdown()
 
+    def _populate_publisher_search(self, filter_text: str = "") -> None:
+        lb = self.publisher_search_list
+        child = lb.get_first_child()
+        while child:
+            nxt = child.get_next_sibling()
+            lb.remove(child)
+            child = nxt
+        for publisher in self._publishers:
+            if filter_text and filter_text.lower() not in publisher.lower():
+                continue
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label(label=publisher, halign=Gtk.Align.START)
+            label.set_margin_start(6)
+            label.set_margin_end(6)
+            label.set_margin_top(4)
+            label.set_margin_bottom(4)
+            row.set_child(label)
+            lb.append(row)
 
+    def _on_publisher_search(self, entry: Gtk.SearchEntry) -> None:
+        self._populate_publisher_search(entry.get_text())
 
-    def _on_type_changed(self, _row, _param) -> None:
+    def _on_publisher_selected(self, _lb, row) -> None:
+        publisher = row.get_child().get_label()
+        self._selected_publisher = publisher
+        self.publisher_value_label.set_label(publisher)
+        self.publisher_popover.popdown()
+
+    def _populate_type_search(self) -> None:
+        lb = self.type_search_list
+        child = lb.get_first_child()
+        while child:
+            nxt = child.get_next_sibling()
+            lb.remove(child)
+            child = nxt
+        for label, _ in self._categories:
+            row = Gtk.ListBoxRow()
+            lbl = Gtk.Label(label=label, halign=Gtk.Align.START)
+            lbl.set_margin_start(6)
+            lbl.set_margin_end(6)
+            lbl.set_margin_top(4)
+            lbl.set_margin_bottom(4)
+            row.set_child(lbl)
+            lb.append(row)
+
+    def _on_type_selected(self, _lb, row) -> None:
+        label = row.get_child().get_label()
+        for i, (lbl, _) in enumerate(self._categories):
+            if lbl == label:
+                self._selected_type_idx = i
+                break
+        self.type_value_label.set_label(label)
+        self.type_popover.popdown()
         self._update_book_image()
 
     def _update_book_image(self) -> None:
-        book_type = self._categories[self.type_row.get_selected()][1]
+        book_type = self._categories[self._selected_type_idx][1]
         self.book_icon_base.set_from_resource(book_resource(book_type))
         if not self._has_publisher_icon:
             self.book_icon_overlay.set_from_resource(type_icon(book_type))
@@ -201,10 +263,9 @@ class ZLibAddBookDialog(Adw.Window):
         card_data = self.card_data
         card_data.title = self.title_row.get_text().strip() or card_data.title
 
-        publisher = self._publishers[self.publisher_row.get_selected()]
-        card_data.publisher = None if publisher == UNKNOWN_PUBLISHER else publisher
+        card_data.publisher = None if self._selected_publisher == UNKNOWN_PUBLISHER else self._selected_publisher
 
-        card_data.type = self._categories[self.type_row.get_selected()][1]
+        card_data.type = self._categories[self._selected_type_idx][1]
         card_data.tags = self._tags
 
         self.close()
