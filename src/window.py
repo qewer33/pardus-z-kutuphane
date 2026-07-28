@@ -92,11 +92,49 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             GObject.BindingFlags.BIDIRECTIONAL,
         )
 
-        # On Wayland CSD is native, so promote our header bar to the real titlebar.
-        box = self.get_child()
-        if box is not None:
-            box.remove(self.header_bar)
-        self.set_titlebar(self.header_bar)
+        # On Wayland CSD is native — promote header bar as titlebar, suppress
+        # GTK's built-in window buttons so we can add our own to the far right.
+        # On X11 (Pardus etap) Mutter ignores GDK decoration hints, so we use
+        # set_decorated(False) with no set_titlebar() to avoid the hidden titlebox.
+        is_x11 = self.get_display().__gtype__.name == "GdkX11Display"
+
+        if is_x11:
+            self.set_decorated(False)
+        else:
+            box = self.get_child()
+            if box is not None:
+                box.remove(self.header_bar)
+            self.set_titlebar(self.header_bar)
+            self.header_bar.props.decoration_layout = ":"
+
+        # Custom window buttons on the end side.
+        # pack_end prepends, so the LAST packed child is LEFTMOST in the end_box.
+        # Remove blueprint [end] children first so we can repack in the right order.
+        self.hamburger.unparent()
+        self.search_btn.unparent()
+
+        close_btn = self._make_title_button("window-close-symbolic", self.close)
+        min_btn = self._make_title_button("window-minimize-symbolic", self.minimize)
+        self._max_icon = Gtk.Image.new_from_icon_name("window-maximize-symbolic")
+        self._max_btn = Gtk.Button()
+        self._max_btn.set_child(self._max_icon)
+        self._max_btn.add_css_class("titlebutton")
+        self._max_btn.connect("clicked", lambda _: self._toggle_maximize())
+        # Pack in reverse order so the visual left-to-right is:
+        # [search_btn] [hamburger] [min_btn] [max_btn] [close_btn]
+        self.header_bar.pack_end(close_btn)        # rightmost
+        self.header_bar.pack_end(self._max_btn)     # second from right
+        self.header_bar.pack_end(min_btn)           # third from right
+        self.header_bar.pack_end(self.hamburger)    # fourth from right
+        self.header_bar.pack_end(self.search_btn)   # leftmost (closest to center)
+
+        # Double-click to maximize
+        gesture = Gtk.GestureClick()
+        gesture.set_button(1)
+        gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        gesture.connect("pressed", self._on_header_double_click)
+        self.header_bar.add_controller(gesture)
+        self.connect("notify::maximized", self._on_maximized_changed)
 
         provider = Gtk.CssProvider()
         provider.load_from_resource("/tr/org/pardus/zkutuphane/style.css")
@@ -642,3 +680,26 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self.card_view.remove_selected_card()
         if not self.card_view.cards_data_list:
             self.card_stack.set_visible_child_name("empty")
+
+    @staticmethod
+    def _make_title_button(icon_name, callback):
+        btn = Gtk.Button.new_from_icon_name(icon_name)
+        btn.add_css_class("titlebutton")
+        btn.connect("clicked", lambda _: callback())
+        return btn
+
+    def _on_header_double_click(self, gesture, n_press, x, y):
+        if n_press == 2:
+            self._toggle_maximize()
+
+    def _toggle_maximize(self):
+        if self.is_maximized():
+            self.unmaximize()
+        else:
+            self.maximize()
+
+    def _on_maximized_changed(self, *args):
+        icon = Gtk.Image.new_from_icon_name(
+            "window-restore-symbolic" if self.is_maximized() else "window-maximize-symbolic",
+        )
+        self._max_btn.set_child(icon)
