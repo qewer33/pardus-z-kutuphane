@@ -96,6 +96,31 @@ actionbar menubutton {
     min-width: 32px;
 }
 
+/* subject filter buttons */
+.subject-filter-btn {
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 0.85em;
+    font-weight: bold;
+    border: 2px solid;
+    background: transparent;
+}
+
+.subject-filter-btn:hover {
+    opacity: 0.8;
+}
+
+.subject-filter-btn:checked {
+    background: alpha(currentColor, 0.2);
+}
+
+.subject-matematik { color: #e74c3c; border-color: #e74c3c; }
+.subject-turkce    { color: #3498db; border-color: #3498db; }
+.subject-fen       { color: #2ecc71; border-color: #2ecc71; }
+.subject-tarih     { color: #f39c12; border-color: #f39c12; }
+.subject-ingilizce { color: #9b59b6; border-color: #9b59b6; }
+.subject-tum       { color: #808080; border-color: #808080; }
+
 /* preferences dialog page tabs: spacing between icon and label */
 viewswitcher box.horizontal > label:last-child {
     margin-left: 8px;

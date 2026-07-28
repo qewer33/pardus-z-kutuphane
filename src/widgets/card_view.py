@@ -73,6 +73,7 @@ class ZLibCardView(Gtk.FlowBox):
         self._search_text = ""
         self._publishers: set[str] = set()
         self._tags: set[str] = set()
+        self._subjects: set[str] = set()
         self._sort_enabled = _sort_enabled_by_default()
         self._filter = Gtk.CustomFilter.new(self._match)
         self._filter_model = Gtk.FilterListModel.new(self.store, self._filter)
@@ -109,6 +110,10 @@ class ZLibCardView(Gtk.FlowBox):
         self._tags = tags
         self._filter.changed(Gtk.FilterChange.DIFFERENT)
 
+    def set_search_subjects(self, subjects: set[str]) -> None:
+        self._subjects = subjects
+        self._filter.changed(Gtk.FilterChange.DIFFERENT)
+
     def _match(self, item: ZLibCardItem, *_) -> bool:
         data = item.data
 
@@ -124,6 +129,11 @@ class ZLibCardView(Gtk.FlowBox):
         if self._tags:
             card_tags = set(data.tags or [])
             if not card_tags.intersection(self._tags):
+                return False
+
+        if self._subjects:
+            card_subjects = set(data.tags or [])
+            if not card_subjects.intersection(self._subjects):
                 return False
 
         return True

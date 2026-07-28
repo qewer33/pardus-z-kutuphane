@@ -40,7 +40,7 @@ template $ZLibAppWindow: Gtk.ApplicationWindow {
         tooltip-text: _("Ekle");
         menu-model: add_menu;
         child: Gtk.Box {
-          margin-top: 4;
+      margin-top: 4;
           margin-bottom: 4;
           margin-start: 6;
           margin-end: 6;
@@ -143,6 +143,14 @@ template $ZLibAppWindow: Gtk.ApplicationWindow {
           };
         }
       }
+    }
+
+    Gtk.Box subject_filter_box {
+      orientation: horizontal;
+      spacing: 6;
+      halign: center;
+      margin-top: 8;
+      margin-bottom: 4;
     }
 
     Gtk.Stack card_stack {

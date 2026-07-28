@@ -46,6 +46,15 @@ LIBRARY_FILE = (
     Path(GLib.get_user_data_dir()) / "tr.org.pardus.zkutuphane" / "library.json"
 )
 
+SUBJECT_FILTERS = [
+    ("tum", "Tüm Dersler", "emblem-system-symbolic", "#808080", set()),
+    ("matematik", "Matematik", "accessories-calculator-symbolic", "#e74c3c", {"Matematik"}),
+    ("turkce", "Türkçe", "accessories-text-editor-symbolic", "#3498db", {"Türkçe", "Türk Dili ve Edebiyatı", "Edebiyat"}),
+    ("fen", "Fen", "applications-science-symbolic", "#2ecc71", {"Fen", "Fen Bilimleri", "Fizik", "Kimya", "Biyoloji"}),
+    ("tarih", "Tarih", "x-office-calendar-symbolic", "#f39c12", {"Tarih", "İnkılap Tarihi"}),
+    ("ingilizce", "İngilizce", "accessories-dictionary-symbolic", "#9b59b6", {"İngilizce"}),
+]
+
 
 @Gtk.Template(resource_path="/tr/org/pardus/zkutuphane/window.ui")
 class ZLibAppWindow(Gtk.ApplicationWindow):
@@ -69,6 +78,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
     publisher_filter_list = Gtk.Template.Child()
     tag_filter_search = Gtk.Template.Child()
     tag_filter_list = Gtk.Template.Child()
+    subject_filter_box = Gtk.Template.Child()
     search_btn = Gtk.Template.Child()
     add_button = Gtk.Template.Child()
     hamburger = Gtk.Template.Child()
@@ -133,6 +143,27 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self.search_bar.connect(
             "notify::search-mode-enabled", self.on_search_mode_changed
         )
+
+        # subject filter buttons
+        self._updating_subjects = False
+        self._subject_buttons: dict[str, Gtk.ToggleButton] = {}
+        for slug, label, icon_name, color, keywords in SUBJECT_FILTERS:
+            btn = Gtk.ToggleButton()
+            box = Gtk.Box(spacing=4)
+            icon = Gtk.Image.new_from_icon_name(icon_name)
+            icon.set_pixel_size(16)
+            lbl = Gtk.Label(label=label)
+            box.append(icon)
+            box.append(lbl)
+            btn.set_child(box)
+            btn.add_css_class("subject-filter-btn")
+            btn.add_css_class(f"subject-{slug}")
+            btn.connect("toggled", self._on_subject_filter)
+            self.subject_filter_box.append(btn)
+            self._subject_buttons[slug] = btn
+
+        # Tüm Dersler active by default (no subject filter)
+        self._subject_buttons["tum"].set_active(True)
 
         # disable bell
         settings = Gtk.Settings.get_default()
@@ -205,6 +236,32 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
     def _on_tag_filter(self, selected: set[str]) -> None:
         self.card_view.set_search_tags(selected)
 
+    def _on_subject_filter(self, _btn) -> None:
+        if self._updating_subjects:
+            return
+        self._updating_subjects = True
+        try:
+            tum_btn = self._subject_buttons["tum"]
+
+            # Tüm Dersler toggled ON → clear all other subject buttons
+            if _btn is tum_btn and tum_btn.get_active():
+                for slug, _, _, _, _ in SUBJECT_FILTERS:
+                    if slug != "tum":
+                        self._subject_buttons[slug].set_active(False)
+
+            # Collect active keywords from non-Tüm Dersler buttons
+            active = set()
+            for slug, _, _, _, keywords in SUBJECT_FILTERS:
+                if slug != "tum" and self._subject_buttons[slug].get_active():
+                    active.update(keywords)
+
+            # Tüm Dersler ON when no subjects active, OFF otherwise
+            tum_btn.set_active(not active)
+
+            self.card_view.set_search_subjects(active)
+        finally:
+            self._updating_subjects = False
+
     def on_search_mode_changed(self, search_bar, _param) -> None:
         if not search_bar.get_search_mode():
             self.search_entry.set_text("")
@@ -212,6 +269,8 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             self.tag_filter_search.set_text("")
             self._clear_filter_listbox(self.publisher_filter_list)
             self._clear_filter_listbox(self.tag_filter_list)
+            for btn in self._subject_buttons.values():
+                btn.set_active(False)
 
     @staticmethod
     def _clear_filter_listbox(listbox: Gtk.ListBox) -> None:
