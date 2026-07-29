@@ -673,6 +673,8 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
     def _on_card_configured(self, card_data: ZLibCardData) -> None:
         self.card_view.refresh_selected_card()
         self.card_selected_label.set_text(card_data.title)
+        self._update_type_pill(card_data.type)
+        self._build_tag_pills(card_data.tags or [])
         self.save_library()
 
     def on_remove_card(self, _action, _param):

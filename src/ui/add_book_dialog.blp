@@ -12,11 +12,6 @@ template $ZLibAddBookDialog: Adw.Window {
       show-end-title-buttons: false;
 
       [start]
-      Gtk.Button cancel_button {
-        label: _("İptal");
-      }
-
-      [end]
       Gtk.Button add_button {
         label: _("Ekle");
 
@@ -24,210 +19,219 @@ template $ZLibAddBookDialog: Adw.Window {
           "suggested-action",
         ]
       }
+
+      [end]
+      Gtk.Button close_btn {
+        child: Gtk.Image {
+          icon-name: "window-close-symbolic";
+        };
+        tooltip-text: _("Kapat");
+      }
     }
 
-    Gtk.Box {
-      orientation: vertical;
-      spacing: 18;
-      margin-top: 12;
-      margin-bottom: 18;
-      margin-start: 18;
-      margin-end: 18;
+      Gtk.Box {
+        orientation: vertical;
+        margin-top: 12;
+        margin-start: 18;
+        margin-end: 18;
+        margin-bottom: 18;
 
-      Overlay {
-        Gtk.Image book_icon_base {
-          pixel-size: 200;
-        }
+        Overlay {
+          Gtk.Image book_icon_base {
+            pixel-size: 200;
+          }
 
-        [overlay]
-        Gtk.Image book_icon_overlay {
-          halign: center;
-          valign: center;
-          pixel-size: 72;
-          margin-bottom: 18;
-        }
-      }
-
-      Adw.PreferencesGroup {
-        Adw.EntryRow title_row {
-          title: _("Başlık");
-        }
-
-        Adw.ActionRow publisher_row {
-          title: _("Yayıncı");
-
-          [suffix]
-          Gtk.MenuButton publisher_dropdown_btn {
-            child: Gtk.Box {
-              spacing: 4;
-
-              Gtk.Label publisher_value_label {
-                css-classes: ["caption"];
-              }
-
-              Gtk.Image {
-                icon-name: "pan-down-symbolic";
-              }
-            };
-
-            popover: Gtk.Popover publisher_popover {
-              position: bottom;
-
-              Gtk.Box {
-                orientation: vertical;
-                spacing: 6;
-                margin-top: 6;
-                margin-bottom: 6;
-                margin-end: 6;
-
-                Gtk.SearchEntry publisher_search_entry {
-                  placeholder-text: _("Yayıncı Ara...");
-                }
-
-                Gtk.ScrolledWindow {
-                  valign: start;
-                  min-content-height: 200;
-                  max-content-height: 300;
-                  min-content-width: 200;
-
-                  Gtk.ListBox publisher_search_list {
-                    selection-mode: single;
-                  }
-                }
-              }
-            };
-
+          [overlay]
+          Gtk.Image book_icon_overlay {
+            halign: center;
             valign: center;
+            pixel-size: 72;
+            margin-bottom: 18;
           }
         }
 
-        Adw.ActionRow type_row {
-          title: _("Tür");
+        Adw.PreferencesGroup {
+          Adw.EntryRow title_row {
+            title: _("Başlık");
+          }
 
-          [suffix]
-          Gtk.MenuButton type_dropdown_btn {
-            child: Gtk.Box {
-              spacing: 4;
+          Adw.ActionRow publisher_row {
+            title: _("Yayıncı");
 
-              Gtk.Label type_value_label {
-                css-classes: ["caption"];
-              }
+            [suffix]
+            Gtk.MenuButton publisher_dropdown_btn {
+              child: Gtk.Box {
+                spacing: 4;
 
-              Gtk.Image {
-                icon-name: "pan-down-symbolic";
-              }
-            };
+                Gtk.Label publisher_value_label {
+                  css-classes: ["caption"];
+                }
 
-            popover: Gtk.Popover type_popover {
-              position: bottom;
+                Gtk.Image {
+                  icon-name: "pan-down-symbolic";
+                }
+              };
 
-              Gtk.Box {
-                orientation: vertical;
-                spacing: 6;
-                margin-top: 6;
-                margin-bottom: 6;
-                margin-end: 6;
+              popover: Gtk.Popover publisher_popover {
+                position: bottom;
 
-                Gtk.ScrolledWindow {
-                  valign: start;
-                  min-content-height: 150;
-                  max-content-height: 250;
-                  min-content-width: 200;
+                Gtk.Box {
+                  orientation: vertical;
+                  spacing: 6;
+                  margin-top: 6;
+                  margin-bottom: 6;
+                  margin-end: 6;
 
-                  Gtk.ListBox type_search_list {
-                    selection-mode: single;
+                  Gtk.SearchEntry publisher_search_entry {
+                    placeholder-text: _("Yayıncı Ara...");
+                  }
+
+                  Gtk.ScrolledWindow {
+                    valign: start;
+                    min-content-height: 200;
+                    max-content-height: 300;
+                    min-content-width: 200;
+
+                    Gtk.ListBox publisher_search_list {
+                      selection-mode: single;
+                    }
                   }
                 }
-              }
-            };
+              };
 
-            valign: center;
+              valign: center;
+            }
           }
-        }
 
-        Adw.PreferencesRow {
-          Gtk.Box {
-            orientation: vertical;
-            margin-start: 12;
-            margin-end: 12;
-            margin-top: 12;
-            margin-bottom: 12;
+          Adw.ActionRow type_row {
+            title: _("Tür");
 
+            [suffix]
+            Gtk.MenuButton type_dropdown_btn {
+              child: Gtk.Box {
+                spacing: 4;
+
+                Gtk.Label type_value_label {
+                  css-classes: ["caption"];
+                }
+
+                Gtk.Image {
+                  icon-name: "pan-down-symbolic";
+                }
+              };
+
+              popover: Gtk.Popover type_popover {
+                position: bottom;
+
+                Gtk.Box {
+                  orientation: vertical;
+                  spacing: 6;
+                  margin-top: 6;
+                  margin-bottom: 6;
+                  margin-end: 6;
+
+                  Gtk.ScrolledWindow {
+                    valign: start;
+                    min-content-height: 150;
+                    max-content-height: 250;
+                    min-content-width: 200;
+
+                    Gtk.ListBox type_search_list {
+                      selection-mode: single;
+                    }
+                  }
+                }
+              };
+
+              valign: center;
+            }
+          }
+
+          Adw.PreferencesRow {
             Gtk.Box {
-              orientation: horizontal;
-              spacing: 6;
-              hexpand: true;
+              orientation: vertical;
+              margin-start: 12;
+              margin-end: 12;
+              margin-top: 12;
               margin-bottom: 12;
 
-              Gtk.Label {
-                label: _("Etiketler");
-                valign: center;
-              }
-
-              Gtk.Label {
+              Gtk.Box {
+                orientation: horizontal;
+                spacing: 6;
                 hexpand: true;
-              }
+                margin-bottom: 12;
 
-              Gtk.MenuButton tag_add_button {
-                child: Gtk.Box {
-                  spacing: 4;
+                Gtk.Label {
+                  label: _("Etiketler");
+                  valign: center;
+                }
 
-                  Gtk.Image {
-                    icon-name: "list-add-symbolic";
-                  }
+                Gtk.Label {
+                  hexpand: true;
+                }
 
-                  Gtk.Label {
-                    label: _("Ekle");
-                  }
-                };
+                Gtk.MenuButton tag_add_button {
+                  child: Gtk.Box {
+                    spacing: 4;
 
-                popover: Gtk.Popover tag_add_popover {
-                  position: bottom;
-
-                  Gtk.Box {
-                    orientation: vertical;
-                    spacing: 6;
-                    margin-top: 6;
-                    margin-bottom: 6;
-                    margin-end: 6;
-
-                    Gtk.SearchEntry tag_search_entry {
-                      placeholder-text: _("Etiket Ara...");
+                    Gtk.Image {
+                      icon-name: "list-add-symbolic";
                     }
 
-                    Gtk.ScrolledWindow {
-                      valign: start;
-                      min-content-height: 200;
-                      max-content-height: 300;
+                    Gtk.Label {
+                      label: _("Ekle");
+                    }
+                  };
 
-                      Gtk.FlowBox tag_search_flowbox {
-                        selection-mode: single;
-                        max-children-per-line: 1;
-                        column-spacing: 4;
-                        row-spacing: 4;
-                        homogeneous: false;
+                  popover: Gtk.Popover tag_add_popover {
+                    position: bottom;
+
+                    Gtk.Box {
+                      orientation: vertical;
+                      spacing: 6;
+                      margin-top: 6;
+                      margin-bottom: 6;
+                      margin-end: 6;
+
+                      Gtk.SearchEntry tag_search_entry {
+                        placeholder-text: _("Etiket Ara...");
+                      }
+
+                      Gtk.ScrolledWindow {
                         valign: start;
+                        min-content-height: 200;
+                        max-content-height: 300;
+
+                        Gtk.FlowBox tag_search_flowbox {
+                          selection-mode: single;
+                          max-children-per-line: 1;
+                          column-spacing: 4;
+                          row-spacing: 4;
+                          homogeneous: false;
+                          valign: start;
+                        }
                       }
                     }
-                  }
-                };
+                  };
 
-                valign: center;
-                tooltip-text: _("Etiket Ekle");
+                  valign: center;
+                  tooltip-text: _("Etiket Ekle");
+                }
+              }
+
+              Gtk.FlowBox tag_flowbox {
+                halign: fill;
+                hexpand: true;
+                max-children-per-line: 20;
+                column-spacing: 2;
+                row-spacing: 2;
+                selection-mode: none;
+                homogeneous: false;
               }
             }
-
-            Gtk.FlowBox tag_flowbox {
-              halign: start;
-              max-children-per-line: 20;
-              column-spacing: 2;
-              row-spacing: 2;
-              selection-mode: none;
-              homogeneous: false;
-            }
           }
+
         }
       }
-    }
   };
 }

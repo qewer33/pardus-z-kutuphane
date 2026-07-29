@@ -45,7 +45,7 @@ class ZLibAddBookDialog(Adw.Window):
     type_popover = Gtk.Template.Child()
     type_search_list = Gtk.Template.Child()
     type_value_label = Gtk.Template.Child()
-    cancel_button = Gtk.Template.Child()
+    close_btn = Gtk.Template.Child()
     add_button = Gtk.Template.Child()
     tag_flowbox = Gtk.Template.Child()
     tag_add_button = Gtk.Template.Child()
@@ -71,6 +71,13 @@ class ZLibAddBookDialog(Adw.Window):
         self.set_modal(True)
         self.set_default_size(420, 520)
         self.add_button.set_label(confirm_label)
+
+        # suppress SSD on X11 and add a close button to the header bar's far right
+        is_x11 = self.get_display().__gtype__.name == "GdkX11Display"
+        if is_x11:
+            self.set_decorated(False)
+        self.close_btn.add_css_class("titlebutton")
+        self.close_btn.connect("clicked", lambda _: self.close())
 
         # tags
         self._tags: list[str] = list(card_data.tags or [])
@@ -111,7 +118,6 @@ class ZLibAddBookDialog(Adw.Window):
         self.type_search_list.connect("row-activated", self._on_type_selected)
         self._update_book_image()
 
-        self.cancel_button.connect("clicked", lambda _button: self.close())
         self.add_button.connect("clicked", self._on_add)
 
         self.tag_add_popover.connect("map", lambda _p: self._populate_tag_search())
@@ -132,7 +138,7 @@ class ZLibAddBookDialog(Adw.Window):
             child = nxt
 
         for tag in self._tags:
-            pill = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+            pill = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0, valign=Gtk.Align.CENTER)
 
             label_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             label_box.set_css_classes(["tag-pill-label"])
