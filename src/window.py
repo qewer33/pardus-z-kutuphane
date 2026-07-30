@@ -92,9 +92,9 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             GObject.BindingFlags.BIDIRECTIONAL,
         )
 
-        # On Wayland CSD is native — promote header bar as titlebar, suppress
-        # GTK's built-in window buttons so we can add our own to the far right.
-        # On X11 (Pardus etap) Mutter ignores GDK decoration hints, so we use
+        # on Wayland CSD is native, so promote the header bar as titlebar and
+        # suppress GTK's built-in window buttons so we can add our own to the far right.
+        # on X11 (Pardus etap) Mutter ignores GDK decoration hints, so we use
         # set_decorated(False) with no set_titlebar() to avoid the hidden titlebox.
         is_x11 = self.get_display().__gtype__.name == "GdkX11Display"
 
@@ -107,9 +107,9 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             self.set_titlebar(self.header_bar)
             self.header_bar.props.decoration_layout = ":"
 
-        # Custom window buttons on the end side.
-        # pack_end prepends, so the LAST packed child is LEFTMOST in the end_box.
-        # Remove blueprint [end] children first so we can repack in the right order.
+        # custom window buttons on the end side
+        # pack_end prepends, so the last packed child is leftmost in the end_box
+        # remove blueprint [end] children first so we can repack in the right order
         self.hamburger.unparent()
         self.search_btn.unparent()
 
@@ -120,7 +120,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self._max_btn.set_child(self._max_icon)
         self._max_btn.add_css_class("titlebutton")
         self._max_btn.connect("clicked", lambda _: self._toggle_maximize())
-        # Pack in reverse order so the visual left-to-right is:
+        # pack in reverse order so the visual left-to-right is:
         # [search_btn] [hamburger] [min_btn] [max_btn] [close_btn]
         self.header_bar.pack_end(close_btn)        # rightmost
         self.header_bar.pack_end(self._max_btn)     # second from right
@@ -128,7 +128,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self.header_bar.pack_end(self.hamburger)    # fourth from right
         self.header_bar.pack_end(self.search_btn)   # leftmost (closest to center)
 
-        # Double-click to maximize
+        # double-click to maximize
         gesture = Gtk.GestureClick()
         gesture.set_button(1)
         gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
@@ -150,9 +150,9 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
 
         # setup drag & drop
         # Wayland (GTK 4.22+): DropTargetAsync + read_value_async(Gdk.FileList)
-        # X11   (GTK 4.8):     DropTarget + G_TYPE_STRING — synchronous
-        #                        text/uri-list delivery; assert warnings
-        #                        are benign GTK 4.8 X11 bugs (#3755)
+        # X11   (GTK 4.8):     DropTarget + G_TYPE_STRING, synchronous
+        #                      text/uri-list delivery; assert warnings
+        #                      are benign GTK 4.8 X11 bugs (#3755)
         if Gtk.get_minor_version() >= 10:
             formats = Gdk.ContentFormats.new_for_gtype(Gdk.FileList.__gtype__)
             drop_target = Gtk.DropTargetAsync.new(formats, Gdk.DragAction.COPY)
@@ -282,19 +282,19 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         try:
             tum_btn = self._subject_buttons["tum"]
 
-            # Tüm Dersler toggled ON → clear all other subject buttons
+            # Tüm Dersler toggled on, so clear all other subject buttons
             if _btn is tum_btn and tum_btn.get_active():
                 for slug, _, _, _, _ in SUBJECT_FILTERS:
                     if slug != "tum":
                         self._subject_buttons[slug].set_active(False)
 
-            # Collect active keywords from non-Tüm Dersler buttons
+            # collect active keywords from non Tüm Dersler buttons
             active = set()
             for slug, _, _, _, keywords in SUBJECT_FILTERS:
                 if slug != "tum" and self._subject_buttons[slug].get_active():
                     active.update(keywords)
 
-            # Tüm Dersler ON when no subjects active, OFF otherwise
+            # Tüm Dersler on when no subjects active, off otherwise
             tum_btn.set_active(not active)
 
             self.card_view.set_search_subjects(active)
@@ -573,8 +573,8 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         if card_data is None or card_data.running:
             return
 
-        # Use the current global wine prefix from GSettings, so that
-        # Preferences changes take effect immediately on next launch.
+        # use the current global wine prefix from GSettings, so Preferences
+        # changes take effect immediately on next launch
         try:
             val = Gio.Settings(schema_id="tr.org.pardus.zkutuphane").get_string("wine-prefix")
             if val:

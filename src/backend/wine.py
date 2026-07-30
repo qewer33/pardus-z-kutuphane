@@ -35,7 +35,7 @@ class WineBackend:
                     return path  # real binary, not a script
         except (IOError, OSError, UnicodeDecodeError):
             return binary
-        # It's a wrapper script — use the real system binary
+        # it's a wrapper script, use the real system binary
         hardcoded = f"/usr/bin/{binary}"
         if os.path.isfile(hardcoded) or os.path.islink(hardcoded):
             return hardcoded
@@ -81,9 +81,9 @@ class WineBackend:
 
         prefix.mkdir(parents=True, exist_ok=True)
 
-        # Try wineboot -u (update) first, which is more lenient than -i
-        # on older Wine / systems with missing dependencies.  Fall back
-        # to -i if that's not available.
+        # try wineboot -u (update) first, which is more lenient than -i
+        # on older Wine / systems with missing dependencies; fall back
+        # to -i if that's not available
         for flag in ("-u", "-i"):
             logger.info("Initializing wineprefix: WINEPREFIX=%s %s %s", prefix, wineboot, flag)
             result = subprocess.run(

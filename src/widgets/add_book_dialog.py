@@ -97,7 +97,7 @@ class ZLibAddBookDialog(Adw.Window):
 
         self.title_row.set_text(card_data.title)
 
-        # publisher — ActionRow with searchable popover
+        # publisher row with searchable popover
         self._publishers = [UNKNOWN_PUBLISHER] + PublisherDetector.names()
         self._selected_publisher = card_data.publisher or UNKNOWN_PUBLISHER
         self.publisher_value_label.set_label(self._selected_publisher)
@@ -107,7 +107,7 @@ class ZLibAddBookDialog(Adw.Window):
         self.publisher_search_entry.connect("search-changed", self._on_publisher_search)
         self.publisher_search_list.connect("row-activated", self._on_publisher_selected)
 
-        # type — ActionRow with popover
+        # type row with popover
         self._categories = [_WEB_CATEGORY] if self.is_web else _FILE_CATEGORIES
         self._selected_type_idx = 0 if self.is_web else _CATEGORY_INDEX.get(card_data.type, 0)
         self.type_value_label.set_label(self._categories[self._selected_type_idx][0])

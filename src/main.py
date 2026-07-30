@@ -46,15 +46,15 @@ class PardusZKutuphaneApplication(Adw.Application):
         self.create_action("preferences", self.on_preferences_action)
 
     def _setup_style(self):
-        # Follow the system light/dark preference explicitly. libadwaita's
+        # follow the system light/dark preference explicitly; libadwaita's
         # automatic detection relies on the xdg-desktop-portal settings, which
         # is often unavailable on X11 sessions (e.g. Pardus/GNOME X11), causing
-        # the app to ignore the system color-scheme and stay light. Reading
-        # org.gnome.desktop.interface directly keeps the app in sync everywhere.
+        # the app to ignore the system color-scheme and stay light; reading
+        # org.gnome.desktop.interface directly keeps the app in sync everywhere
         style_manager = Adw.StyleManager.get_default()
 
-        # The user's explicit theme choice ("system"/"light"/"dark") lives in
-        # the app's own GSettings. "system" falls back to following the desktop.
+        # the user's explicit theme choice ("system"/"light"/"dark") lives in
+        # the app's own GSettings; "system" falls back to following the desktop
         try:
             app_settings = Gio.Settings.new("tr.org.pardus.zkutuphane")
         except Exception:
@@ -65,8 +65,8 @@ class PardusZKutuphaneApplication(Adw.Application):
         except Exception:
             settings = None
 
-        # Accessing a missing key is a fatal GLib error, so probe the schema
-        # first. The legacy boolean key was dropped from newer schemas.
+        # accessing a missing key is a fatal GLib error, so probe the schema
+        # first; the legacy boolean key was dropped from newer schemas
         keys = []
         if settings is not None:
             try:
