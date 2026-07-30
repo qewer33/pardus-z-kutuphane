@@ -52,7 +52,7 @@ Kütüphaneden bir Z-Kitap seçildikten sonra, pencerenin altında beliren eylem
 
 Sağ üstte bulunan **arama ikonuna** tıklanınca yukarıdan açılan **arama çubuğu** kullanılarak kütüphanedeki Z-Kitaplar isimlerine göre aranabilir. Arama çubuğunda ayrıca **Yayıncı** ve **Etiket** butonları bulunur; bu butonlar ile kitaplar yayıncılarına ve etiketlerine göre filtrelenebilir. Yapılan arama ve filtrelemeler birlikte uygulanır.
 
-Kütüphane görünümünün üst kısmında bulunan **ders filtresi butonları** (Tüm Dersler, Matematik, Türkçe, Fen, Tarih, İngilizce) ile kitaplar, ait oldukları başlıca derslere göre tek tıkla hızlıca görüntülenebilir. **Tüm Dersler** butonu ders filtresini kaldırarak kütüphanedeki tüm kitapları gösterir.
+Kütüphane görünümünün üst kısmında bulunan **ders filtresi butonları** (Tüm Dersler, Matematik, Türkçe, Fen, Sosyal, Yabancı Dil, Diğer) ile kitaplar, ait oldukları başlıca derslere göre tek tıkla hızlıca görüntülenebilir. **Tüm Dersler** butonu ders filtresini kaldırarak kütüphanedeki tüm kitapları gösterir.
 
 ## Geliştirme ve Altyapı
 
