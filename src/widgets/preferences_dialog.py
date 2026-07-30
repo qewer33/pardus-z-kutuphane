@@ -12,8 +12,12 @@ SCHEMA_ID = "tr.org.pardus.zkutuphane"
 class PreferencesDialog(Adw.PreferencesWindow):
     __gtype_name__ = "PreferencesDialog"
 
+    # combo row order (Sistem, Aydınlık, Karanlık) -> "theme" setting value
+    _THEME_VALUES = ("system", "light", "dark")
+
     genel_page = Gtk.Template.Child()
     wine_page = Gtk.Template.Child()
+    _theme_row = Gtk.Template.Child()
     _sort_switch = Gtk.Template.Child()
     _log_dir_row = Gtk.Template.Child()
     _log_dir_browse = Gtk.Template.Child()
@@ -37,6 +41,12 @@ class PreferencesDialog(Adw.PreferencesWindow):
         self._file_dialog = None
 
         self._settings = Gio.Settings(schema_id=SCHEMA_ID)
+
+        # theme: map the "theme" string setting <-> combo row index
+        self._theme_row.set_selected(
+            self._THEME_VALUES.index(self._current_theme())
+        )
+        self._theme_row.connect("notify::selected", self._on_theme_changed)
 
         self._settings.bind(
             "sort-by-launch-count", self._sort_switch, "active", Gio.SettingsBindFlags.DEFAULT
@@ -73,6 +83,15 @@ class PreferencesDialog(Adw.PreferencesWindow):
             self.wine_page.props.icon_name = "computer-symbolic"
         except AttributeError:
             pass
+
+    def _current_theme(self) -> str:
+        theme = self._settings.get_string("theme")
+        return theme if theme in self._THEME_VALUES else "system"
+
+    def _on_theme_changed(self, row: Adw.ComboRow, _param) -> None:
+        index = row.get_selected()
+        if 0 <= index < len(self._THEME_VALUES):
+            self._settings.set_string("theme", self._THEME_VALUES[index])
 
     def _prefix(self) -> str:
         return Path(self._settings.get_string("wine-prefix")).expanduser()

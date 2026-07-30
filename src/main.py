@@ -52,22 +52,32 @@ class PardusZKutuphaneApplication(Adw.Application):
         # the app to ignore the system color-scheme and stay light. Reading
         # org.gnome.desktop.interface directly keeps the app in sync everywhere.
         style_manager = Adw.StyleManager.get_default()
+
+        # The user's explicit theme choice ("system"/"light"/"dark") lives in
+        # the app's own GSettings. "system" falls back to following the desktop.
+        try:
+            app_settings = Gio.Settings.new("tr.org.pardus.zkutuphane")
+        except Exception:
+            app_settings = None
+
         try:
             settings = Gio.Settings.new("org.gnome.desktop.interface")
         except Exception:
-            return
+            settings = None
 
         # Accessing a missing key is a fatal GLib error, so probe the schema
         # first. The legacy boolean key was dropped from newer schemas.
-        try:
-            keys = settings.list_keys()
-        except Exception:
-            return
+        keys = []
+        if settings is not None:
+            try:
+                keys = settings.list_keys()
+            except Exception:
+                keys = []
 
         has_legacy = "gtk-application-prefer-dark-theme" in keys
         has_scheme = "color-scheme" in keys
 
-        def apply():
+        def apply_system():
             prefer_dark = False
             if has_legacy:
                 prefer_dark = settings.get_boolean("gtk-application-prefer-dark-theme")
@@ -82,10 +92,25 @@ class PardusZKutuphaneApplication(Adw.Application):
             else:
                 style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
 
+        def apply():
+            theme = "system"
+            if app_settings is not None:
+                theme = app_settings.get_string("theme")
+            if theme == "light":
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+            elif theme == "dark":
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+            elif settings is not None:
+                apply_system()
+            else:
+                style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
+
         apply()
-        if has_scheme:
+        if app_settings is not None:
+            app_settings.connect("changed::theme", lambda *_: apply())
+        if settings is not None and has_scheme:
             settings.connect("changed::color-scheme", lambda *_: apply())
-        if has_legacy:
+        if settings is not None and has_legacy:
             settings.connect(
                 "changed::gtk-application-prefer-dark-theme", lambda *_: apply()
             )

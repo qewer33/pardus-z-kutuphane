@@ -5,6 +5,22 @@ template $PreferencesDialog: Adw.PreferencesWindow {
   Adw.PreferencesPage genel_page {
     title: _("Genel");
 
+    Adw.PreferencesGroup theme_group {
+      title: _("Tema");
+
+      Adw.ComboRow _theme_row {
+        title: _("Renk teması");
+
+        model: Gtk.StringList {
+          strings [
+            _("Sistem"),
+            _("Aydınlık"),
+            _("Karanlık"),
+          ]
+        };
+      }
+    }
+
     Adw.PreferencesGroup sort_group {
       title: _("Sıralama");
 

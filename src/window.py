@@ -225,6 +225,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             self.add_action(action)
 
         self._update_launch_action()
+        self._update_log_action()
 
         self.load_library()
 
@@ -557,6 +558,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         if card_data is None:
             self.card_action_bar.set_revealed(False)
             self._update_launch_action()
+            self._update_log_action()
             return
         self.card_selected_label.set_text(card_data.title)
         self._update_type_pill(card_data.type)
@@ -564,6 +566,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self.card_action_bar.queue_draw()
         self.card_action_bar.set_revealed(True)
         self._update_launch_action()
+        self._update_log_action()
 
     def on_launch_card(self, _action, _param):
         card_data = self.card_view.get_selected_card()
@@ -626,6 +629,16 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         if selected is not None:
             self.lookup_action("launch-card").set_enabled(not selected.running)
 
+    def _update_log_action(self) -> None:
+        """Enable the log ("Günce") menu item only for application types,
+        since PDFs and web books don't produce a run log."""
+        selected = self.card_view.get_selected_card()
+        enabled = selected is not None and selected.type not in (
+            ExecutableType.PDF,
+            ExecutableType.WEBBOOK,
+        )
+        self.lookup_action("show-log-card").set_enabled(enabled)
+
     def _build_tag_pills(self, tags: list[str]) -> None:
         child = self.tag_pill_container.get_first_child()
         while child:
@@ -675,6 +688,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self.card_selected_label.set_text(card_data.title)
         self._update_type_pill(card_data.type)
         self._build_tag_pills(card_data.tags or [])
+        self._update_log_action()
         self.save_library()
 
     def on_remove_card(self, _action, _param):

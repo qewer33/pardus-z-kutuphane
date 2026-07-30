@@ -28,6 +28,16 @@
 			<summary>Cache directory</summary>
 			<description>Directory for cached data such as publisher icons.</description>
 		</key>
+		<key name="theme" type="s">
+			<choices>
+				<choice value="system"/>
+				<choice value="light"/>
+				<choice value="dark"/>
+			</choices>
+			<default>'system'</default>
+			<summary>Application color theme</summary>
+			<description>Preferred color theme: system to follow the desktop, or light/dark to force one.</description>
+		</key>
 		<key name="sort-by-launch-count" type="b">
 			<default>true</default>
 			<summary>Sort by launch count</summary>

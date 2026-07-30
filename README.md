@@ -13,7 +13,7 @@ Pardus Z-Kütüphane, Gazi Üniversitesi'nden **Anadolu Penguenleri** takımı t
 
 ### Kütüphane Görünümü
 
-Uygulamaya eklenen Z-Kitaplar, ızgara şeklindeki kütüphane görünümüne eklenir. Kütüphane görümününde, 
+Uygulamaya eklenen Z-Kitaplar, ızgara şeklindeki kütüphane görünümüne eklenir. Kütüphane görümününde,
 
 ### Kitap Ekleme
 
@@ -26,13 +26,22 @@ Seçilen yöntem ile ekleme yapıldıktan sonra, **Kitap Ekle** penceresi açıl
 
 Kitap özellikleri, kitap eklendikten sonra Çalıştır butonunun yanındaki menü içerisindeki **Düzenle** seçeneği seçilerek de düzenlenebilir.
 
+### Kitap Açma/Çalıştırma
+
+
 ### Kitap Arama ve Filtreleme
 
 Sağ üstte bulunan **arama ikonuna** tıklanınca yukarıdan aılan **arama çubuğu** kullanılarak kütüphanedeki Z-Kitaplar arasında arama yapılabilir.
 
+
+
 ## Geliştirme ve Altyapı
 
 Proje Meson build sistemini kullanmaktadır. Uygulama, kök dizinindeki `./run.sh` scriptini çalıştırarak çalıştırılabilir.
+
+### Backend Sistemi
+
+### Arayüz Altyapısı
 
 ### Derleme Bağımlılıkları
 
