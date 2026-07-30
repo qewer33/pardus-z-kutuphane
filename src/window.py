@@ -301,26 +301,48 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self, listbox: Gtk.ListBox, search: Gtk.SearchEntry,
         items: list[str], on_change, store: dict | None = None,
     ) -> None:
-        checkbuttons: list[Gtk.CheckButton] = []
-        for item in items:
-            cb = Gtk.CheckButton(label=item)
-            listbox.append(cb)
-            checkbuttons.append(cb)
-            if store is not None:
-                store[item] = cb
+        """Build a filter list by rebuilding on every search (no hidden wrappers → no gaps)."""
 
-        def _update_filter(*_):
-            selected = {cb.get_label() for cb in checkbuttons if cb.get_active()}
-            on_change(selected)
-
-        def _on_search(*_):
+        def _rebuild():
             text = search.get_text().strip().lower()
-            for cb in checkbuttons:
-                cb.set_visible(not text or text in cb.get_label().lower())
 
-        search.connect("search-changed", _on_search)
-        for cb in checkbuttons:
-            cb.connect("toggled", _update_filter)
+            # clear old children
+            child = listbox.get_first_child()
+            while child:
+                nxt = child.get_next_sibling()
+                listbox.remove(child)
+                child = nxt
+            if store is not None:
+                store.clear()
+
+            # add only matching items
+            for item in items:
+                if text and text not in item.lower():
+                    continue
+                cb = Gtk.CheckButton(label=item)
+                listbox.append(cb)
+                if store is not None:
+                    store[item] = cb
+
+            # connect toggled signals for the new buttons
+            def _update_filter(*_):
+                selected = set()
+                cur = listbox.get_first_child()
+                while cur:
+                    if isinstance(cur, Gtk.CheckButton) and cur.get_active():
+                        selected.add(cur.get_label())
+                    cur = cur.get_next_sibling()
+                on_change(selected)
+
+            cur = listbox.get_first_child()
+            while cur:
+                if isinstance(cur, Gtk.CheckButton):
+                    cur.connect("toggled", _update_filter)
+                cur = cur.get_next_sibling()
+
+        # initial build, then rebuild on every keystroke
+        _rebuild()
+        search.connect("search-changed", lambda *_: _rebuild())
 
     def _on_publisher_filter(self, selected: set[str]) -> None:
         self.card_view.set_search_publishers(selected)
