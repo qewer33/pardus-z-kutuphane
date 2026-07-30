@@ -46,6 +46,14 @@ class PardusZKutuphaneApplication(Adw.Application):
         self.create_action("preferences", self.on_preferences_action)
 
     def _setup_style(self):
+        # TEMP: use libadwaita's empty base theme so only its own stylesheet
+        # (loaded explicitly in the window) styles widgets. This bypasses the
+        # system GTK theme and prevents the base theme from double-styling.
+        gtk_settings = Gtk.Settings.get_default()
+        if gtk_settings is not None:
+            gtk_settings.set_property("gtk-theme-name", "Adwaita-empty")
+            gtk_settings.set_property("gtk-icon-theme-name", "Adwaita")
+
         # follow the system light/dark preference explicitly; libadwaita's
         # automatic detection relies on the xdg-desktop-portal settings, which
         # is often unavailable on X11 sessions (e.g. Pardus/GNOME X11), causing
