@@ -7,7 +7,7 @@ Pardus Z-Kütüphane; çalıştırılabilir uygulama (Windows `.exe` veya Linux 
 Pardus Z-Kütüphane, Gazi Üniversitesi'nden **Anadolu Penguenleri** takımı tarafından, **TEKNOFEST Pardus Hata Yakalama ve Geliştirme Yarışması** için geliştirilmiştir.
 
 
-![screenshot](./assets/screenshot.png)
+![about](./assets/about.png)
 
 ## Kurulum
 
@@ -17,11 +17,15 @@ Pardus Z-Kütüphane'yi, GitHub depomuzun Releases kısmındaki `.deb` paketini 
 
 ### Kütüphane Görünümü
 
+![screenshot](./assets/library.png)
+
 Uygulamaya eklenen Z-Kitaplar, ızgara şeklindeki kütüphane görünümüne eklenir. Her Z-Kitap; kapağı, ismi ve yayıncısı ile bir kart olarak gösterilir. Kartların üzerindeki simge ve renkler, kitabın türünü (uygulama, PDF veya web) belirtir. Kütüphane boşken, ekranda kitap eklemeye yönlendiren bir karşılama mesajı gösterilir. Kitaplar, varsayılan olarak en çok kullanılan en üstte olacak şekilde sıralanır.
 
 Bir karta tıklanıp seçildiğinde, pencerenin altında o kitaba ait detayların (isim, tür ve etiketler), **Çalıştır** butonunun ve diğer eylemleri içeren bir menünün bulunduğu bir eylem çubuğu belirir.
 
 ### Kitap Ekleme
+
+![addbook](./assets/addbook.png)
 
 Pencerenin sol üst köşesinde bulunan **Ekle** butonu kullanılarak kütüphaneye Z-Kitao eklenebilir. Ekle butonuna tıklandığında **Dosya ekle** ve **Bağlantı ekle** olmak üzere iki seçenek çıkar:
 
@@ -43,6 +47,8 @@ Kütüphaneden bir Z-Kitap seçildikten sonra, pencerenin altında beliren eylem
 Çalıştırılan bir uygulamanın ürettiği çıktılar, **Çalıştır** butonunun yanındaki menüde bulunan **Günce** seçeneği ile görüntülenebilir. Günce yalnızca uygulama türündeki Z-Kitaplar için kullanılabilir.
 
 ### Kitap Arama ve Filtreleme
+
+![screenshot](./assets/filter.png)
 
 Sağ üstte bulunan **arama ikonuna** tıklanınca yukarıdan açılan **arama çubuğu** kullanılarak kütüphanedeki Z-Kitaplar isimlerine göre aranabilir. Arama çubuğunda ayrıca **Yayıncı** ve **Etiket** butonları bulunur; bu butonlar ile kitaplar yayıncılarına ve etiketlerine göre filtrelenebilir. Yapılan arama ve filtrelemeler birlikte uygulanır.
 
