@@ -47,12 +47,19 @@ LIBRARY_FILE = (
 )
 
 SUBJECT_FILTERS = [
-    ("tum", "Tüm Dersler", "emblem-system-symbolic", "#808080", set()),
-    ("matematik", "Matematik", "accessories-calculator-symbolic", "#e74c3c", {"Matematik"}),
-    ("turkce", "Türkçe", "accessories-text-editor-symbolic", "#3498db", {"Türkçe", "Türk Dili ve Edebiyatı", "Edebiyat"}),
+    ("tum", "Tüm Dersler", "view-grid-symbolic", "#808080", set()),
+    ("matematik", "Matematik", "accessories-calculator-symbolic", "#3498db", {"Matematik", "Geometri", "Problemler"}),
+    ("turkce", "Türkçe", "accessories-dictionary-symbolic", "#e74c3c", {"Türkçe", "Türk Dili ve Edebiyatı", "Edebiyat", "Dil ve Anlatım", "Paragraf", "Dil Bilgisi"}),
     ("fen", "Fen", "applications-science-symbolic", "#2ecc71", {"Fen", "Fen Bilimleri", "Fizik", "Kimya", "Biyoloji"}),
-    ("tarih", "Tarih", "x-office-calendar-symbolic", "#f39c12", {"Tarih", "İnkılap Tarihi"}),
-    ("ingilizce", "İngilizce", "accessories-dictionary-symbolic", "#9b59b6", {"İngilizce"}),
+    ("sosyal", "Sosyal", "system-users-symbolic", "#f39c12", {
+        "Tarih", "İnkılap Tarihi", "Coğrafya", "Felsefe", "Psikoloji",
+        "Sosyoloji", "Mantık", "Din Kültürü ve Ahlak Bilgisi",
+        "Sosyal Bilgiler", "Vatandaşlık", "Demokrasi ve İnsan Hakları",
+    }),
+    ("yabanci", "Yabancı Dil", "preferences-desktop-locale-symbolic", "#9b59b6", {"İngilizce", "Almanca", "Fransızca", "Yabancı Dil"}),
+    ("diger", "Diğer", "application-x-addon-symbolic", "#1abc9c", {
+        "Hayat Bilgisi", "Rehberlik", "Sağlık Bilgisi", "Trafik ve İlk Yardım",
+    }),
 ]
 
 
@@ -79,6 +86,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
     tag_filter_search = Gtk.Template.Child()
     tag_filter_list = Gtk.Template.Child()
     subject_filter_box = Gtk.Template.Child()
+    subject_scroll = Gtk.Template.Child()
     search_btn = Gtk.Template.Child()
     add_button = Gtk.Template.Child()
     hamburger = Gtk.Template.Child()
@@ -167,6 +175,13 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
 
         # setup search
 
+        # shared filter state: the subject tiles and the tag filter list drive
+        # the same underlying tag filter, so keep references to sync them
+        self._syncing_filters = False
+        self._tag_checkbuttons: dict[str, Gtk.CheckButton] = {}
+        self._subject_buttons: dict[str, Gtk.ToggleButton] = {}
+        self._subject_keywords: dict[str, set[str]] = {}
+
         self.search_bar.connect_entry(self.search_entry)
         self.search_bar.set_key_capture_widget(self)
         self.search_entry.connect("search-changed", self.on_search_changed)
@@ -176,20 +191,18 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         )
         self._setup_filter_listbox(
             self.tag_filter_list, self.tag_filter_search,
-            ALL_TAGS, self._on_tag_filter,
+            ALL_TAGS, self._on_tag_filter, store=self._tag_checkbuttons,
         )
         self.search_bar.connect(
             "notify::search-mode-enabled", self.on_search_mode_changed
         )
 
         # subject filter buttons
-        self._updating_subjects = False
-        self._subject_buttons: dict[str, Gtk.ToggleButton] = {}
         for slug, label, icon_name, color, keywords in SUBJECT_FILTERS:
             btn = Gtk.ToggleButton()
-            box = Gtk.Box(spacing=4)
+            box = Gtk.Box(spacing=6, halign=Gtk.Align.CENTER)
             icon = Gtk.Image.new_from_icon_name(icon_name)
-            icon.set_pixel_size(16)
+            icon.set_pixel_size(18)
             lbl = Gtk.Label(label=label)
             box.append(icon)
             box.append(lbl)
@@ -199,6 +212,14 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             btn.connect("toggled", self._on_subject_filter)
             self.subject_filter_box.append(btn)
             self._subject_buttons[slug] = btn
+            self._subject_keywords[slug] = set(keywords)
+
+        # let a normal vertical wheel scroll the subject row horizontally
+        scroll_ctrl = Gtk.EventControllerScroll.new(
+            Gtk.EventControllerScrollFlags.BOTH_AXES
+        )
+        scroll_ctrl.connect("scroll", self._on_subject_scroll)
+        self.subject_scroll.add_controller(scroll_ctrl)
 
         # Tüm Dersler active by default (no subject filter)
         self._subject_buttons["tum"].set_active(True)
@@ -248,13 +269,15 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
 
     def _setup_filter_listbox(
         self, listbox: Gtk.ListBox, search: Gtk.SearchEntry,
-        items: list[str], on_change,
+        items: list[str], on_change, store: dict | None = None,
     ) -> None:
         checkbuttons: list[Gtk.CheckButton] = []
         for item in items:
             cb = Gtk.CheckButton(label=item)
             listbox.append(cb)
             checkbuttons.append(cb)
+            if store is not None:
+                store[item] = cb
 
         def _update_filter(*_):
             selected = {cb.get_label() for cb in checkbuttons if cb.get_active()}
@@ -273,43 +296,93 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self.card_view.set_search_publishers(selected)
 
     def _on_tag_filter(self, selected: set[str]) -> None:
-        self.card_view.set_search_tags(selected)
-
-    def _on_subject_filter(self, _btn) -> None:
-        if self._updating_subjects:
+        # driven programmatically by a subject tile; it already filters
+        if self._syncing_filters:
             return
-        self._updating_subjects = True
+        self.card_view.set_search_tags(selected)
+        self._sync_subjects_from_tags(selected)
+
+    def _apply_tags_to_checkboxes(self, tags: set[str]) -> None:
+        """Check exactly the given tags in the tag filter list."""
+        for label, cb in self._tag_checkbuttons.items():
+            cb.set_active(label in tags)
+
+    def _sync_subjects_from_tags(self, selected: set[str]) -> None:
+        """Light up the subject tile matching the selected tags, if any."""
+        match_slug = None
+        if not selected:
+            match_slug = "tum"
+        else:
+            for slug, keywords in self._subject_keywords.items():
+                if slug != "tum" and keywords == selected:
+                    match_slug = slug
+                    break
+        self._syncing_filters = True
         try:
+            for slug, btn in self._subject_buttons.items():
+                btn.set_active(slug == match_slug)
+        finally:
+            self._syncing_filters = False
+
+    def _on_subject_scroll(self, _controller, dx: float, dy: float) -> bool:
+        hadj = self.subject_scroll.get_hadjustment()
+        if hadj is None:
+            return False
+        # translate a vertical (or horizontal) wheel notch into a horizontal step
+        delta = dy if abs(dy) >= abs(dx) else dx
+        if delta == 0:
+            return False
+        hadj.set_value(hadj.get_value() + delta * 50)
+        return True
+
+    def _on_subject_filter(self, btn) -> None:
+        # the tiles act like radio buttons: one active subject at a time
+        if self._syncing_filters:
+            return
+        self._syncing_filters = True
+        try:
+            clicked_slug = next(
+                (s for s, b in self._subject_buttons.items() if b is btn), None
+            )
             tum_btn = self._subject_buttons["tum"]
 
-            # Tüm Dersler toggled on, so clear all other subject buttons
-            if _btn is tum_btn and tum_btn.get_active():
-                for slug, _, _, _, _ in SUBJECT_FILTERS:
-                    if slug != "tum":
-                        self._subject_buttons[slug].set_active(False)
+            if clicked_slug == "tum":
+                # "Tüm Dersler" is the no-filter state; keep it the only active tile
+                for slug, b in self._subject_buttons.items():
+                    b.set_active(slug == "tum")
+                keywords: set[str] = set()
+            elif btn.get_active():
+                # activate this subject, deactivate everything else (incl. Tüm Dersler)
+                for b in self._subject_buttons.values():
+                    if b is not btn:
+                        b.set_active(False)
+                keywords = set(self._subject_keywords.get(clicked_slug, set()))
+            else:
+                # toggled the active subject back off -> fall back to "Tüm Dersler"
+                tum_btn.set_active(True)
+                keywords = set()
 
-            # collect active keywords from non Tüm Dersler buttons
-            active = set()
-            for slug, _, _, _, keywords in SUBJECT_FILTERS:
-                if slug != "tum" and self._subject_buttons[slug].get_active():
-                    active.update(keywords)
-
-            # Tüm Dersler on when no subjects active, off otherwise
-            tum_btn.set_active(not active)
-
-            self.card_view.set_search_subjects(active)
+            # keep the search-bar tag filters in sync, then filter once
+            self._apply_tags_to_checkboxes(keywords)
+            self.card_view.set_search_tags(keywords)
         finally:
-            self._updating_subjects = False
+            self._syncing_filters = False
 
     def on_search_mode_changed(self, search_bar, _param) -> None:
         if not search_bar.get_search_mode():
             self.search_entry.set_text("")
             self.publisher_filter_search.set_text("")
             self.tag_filter_search.set_text("")
-            self._clear_filter_listbox(self.publisher_filter_list)
-            self._clear_filter_listbox(self.tag_filter_list)
-            for btn in self._subject_buttons.values():
-                btn.set_active(False)
+            self._syncing_filters = True
+            try:
+                self._clear_filter_listbox(self.publisher_filter_list)
+                self._clear_filter_listbox(self.tag_filter_list)
+                for slug, btn in self._subject_buttons.items():
+                    btn.set_active(slug == "tum")
+            finally:
+                self._syncing_filters = False
+            self.card_view.set_search_publishers(set())
+            self.card_view.set_search_tags(set())
 
     @staticmethod
     def _clear_filter_listbox(listbox: Gtk.ListBox) -> None:

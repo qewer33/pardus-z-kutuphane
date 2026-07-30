@@ -96,30 +96,48 @@ actionbar menubutton {
     min-width: 32px;
 }
 
-/* subject filter buttons */
+/* subject filter buttons (GNOME Software style category tiles) */
 .subject-filter-btn {
-    border-radius: 16px;
-    padding: 4px 12px;
-    font-size: 0.85em;
+    border-radius: 12px;
+    padding: 14px 16px;
     font-weight: bold;
-    border: 2px solid;
-    background: transparent;
+    color: #ffffff;
+    border: none;
+    background-color: transparent;
+    background-image: linear-gradient(to bottom right, #6b7280, #434956);
+    box-shadow: none;
+    opacity: 0.82;
+    transition: opacity 150ms ease, box-shadow 150ms ease;
 }
 
+.subject-filter-btn label,
+.subject-filter-btn image {
+    color: #ffffff;
+}
+
+/* inactive tiles are slightly muted; hover previews the full color */
 .subject-filter-btn:hover {
-    opacity: 0.8;
+    opacity: 1;
 }
 
+/* active filter: full color, slightly raised */
 .subject-filter-btn:checked {
-    background: alpha(currentColor, 0.2);
+    opacity: 1;
+    box-shadow: 0 2px 6px alpha(#000000, 0.3);
 }
 
-.subject-matematik { color: #e74c3c; border-color: #e74c3c; }
-.subject-turkce    { color: #3498db; border-color: #3498db; }
-.subject-fen       { color: #2ecc71; border-color: #2ecc71; }
-.subject-tarih     { color: #f39c12; border-color: #f39c12; }
-.subject-ingilizce { color: #9b59b6; border-color: #9b59b6; }
-.subject-tum       { color: #808080; border-color: #808080; }
+.subject-filter-btn:checked:hover {
+    opacity: 1;
+}
+
+/* per-subject gradients */
+.subject-tum       { background-image: linear-gradient(to bottom right, #6b7280, #434956); }
+.subject-matematik { background-image: linear-gradient(to bottom right, #4aa9e8, #2472b0); }
+.subject-turkce    { background-image: linear-gradient(to bottom right, #ff6b5b, #d63a2a); }
+.subject-fen       { background-image: linear-gradient(to bottom right, #34d17f, #1f9b57); }
+.subject-sosyal    { background-image: linear-gradient(to bottom right, #f7b34a, #e07d1c); }
+.subject-yabanci   { background-image: linear-gradient(to bottom right, #b06bc9, #8232a3); }
+.subject-diger     { background-image: linear-gradient(to bottom right, #20c5a8, #12876f); }
 
 /* preferences dialog page tabs: spacing between icon and label */
 viewswitcher box.horizontal > label:last-child {

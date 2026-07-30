@@ -145,12 +145,22 @@ template $ZLibAppWindow: Gtk.ApplicationWindow {
       }
     }
 
-    Gtk.Box subject_filter_box {
-      orientation: horizontal;
-      spacing: 6;
-      halign: center;
-      margin-top: 8;
+    Gtk.ScrolledWindow subject_scroll {
+      hscrollbar-policy: automatic;
+      vscrollbar-policy: never;
+      propagate-natural-height: true;
+      kinetic-scrolling: true;
+      has-frame: false;
+      margin-top: 14;
       margin-bottom: 4;
+
+      Gtk.Box subject_filter_box {
+        orientation: horizontal;
+        homogeneous: true;
+        spacing: 8;
+        margin-start: 12;
+        margin-end: 12;
+      }
     }
 
     Gtk.Stack card_stack {
