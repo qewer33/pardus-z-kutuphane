@@ -28,10 +28,23 @@ class PardusZKutuphaneApplication(Adw.Application):
 
     def _setup_style(self):
         # bypass system theme with adwaita's empty theme for preventing double-styling.
+        #
+        # capture the system GTK theme name *before* overriding it: on desktops
+        # that don't expose org.gnome.desktop.interface color-scheme (notably
+        # XFCE, e.g. Pardus 25), the only signal of the system's light/dark
+        # preference is the GTK theme name (a "-dark" variant), which XFCE sets
+        # via XSettings. Once we clobber it with "Adwaita-empty" this is lost,
+        # so read it first.
         gtk_settings = Gtk.Settings.get_default()
+        system_gtk_theme = ""
         if gtk_settings is not None:
+            try:
+                system_gtk_theme = gtk_settings.get_property("gtk-theme-name") or ""
+            except Exception:
+                system_gtk_theme = ""
             gtk_settings.set_property("gtk-theme-name", "Adwaita-empty")
             gtk_settings.set_property("gtk-icon-theme-name", "Adwaita")
+        self._system_gtk_theme = system_gtk_theme
 
         style_manager = Adw.StyleManager.get_default()
 
@@ -47,7 +60,7 @@ class PardusZKutuphaneApplication(Adw.Application):
             settings = Gio.Settings.new("org.gnome.desktop.interface")
         except Exception:
             settings = None
-        self._app_settings = app_settings
+        self._desktop_settings = settings
 
         # check if keys exist to avoid fatal error
         keys = []
@@ -72,6 +85,9 @@ class PardusZKutuphaneApplication(Adw.Application):
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
             elif scheme == "prefer-light":
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+            elif "dark" in self._system_gtk_theme.lower():
+                # no color-scheme preference, infer from theme name
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
             else:
                 style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
 
