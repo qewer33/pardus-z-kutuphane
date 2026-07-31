@@ -33,9 +33,6 @@ class PardusZKutuphaneApplication(Adw.Application):
             gtk_settings.set_property("gtk-theme-name", "Adwaita-empty")
             gtk_settings.set_property("gtk-icon-theme-name", "Adwaita")
 
-        # follow the system light/dark preference explicitly
-        # adwaita's auto-detection did not work for Pardus ETAP 23
-        # use org.gnome.desktop.interface to get the setting.
         style_manager = Adw.StyleManager.get_default()
 
         # user's settings
@@ -43,12 +40,14 @@ class PardusZKutuphaneApplication(Adw.Application):
             app_settings = Gio.Settings.new("tr.org.pardus.zkutuphane")
         except Exception:
             app_settings = None
+        self._app_settings = app_settings
 
         # system settings
         try:
             settings = Gio.Settings.new("org.gnome.desktop.interface")
         except Exception:
             settings = None
+        self._app_settings = app_settings
 
         # check if keys exist to avoid fatal error
         keys = []
