@@ -82,13 +82,10 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             GObject.BindingFlags.BIDIRECTIONAL,
         )
 
-        # we draw our window-control own buttons (for cross-compatability with Pardus ETAP)
-        # so disable built-in buttons.
+        # we draw our window-control own buttons (for compatability with Pardus ETAP)
         self.header_bar.set_show_title_buttons(False)
 
         # we use our header bar as the title bar in wayland.
-        # for x11, disable server side decoration so the wm does not
-        # add its on title bar (for Pardus ETAP which has Mutter)
         is_x11 = self.get_display().__gtype__.name == "GdkX11Display"
 
         if is_x11:
@@ -102,8 +99,6 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             self.set_titlebar(self.header_bar)
 
         # remove the buttons so we can order them like we want
-        # pack_end prepends what's passed to it
-        # this causes the buttons to be in reverse order (see comment below)
         self.hamburger.unparent()
         self.search_btn.unparent()
 
@@ -115,12 +110,12 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self._max_btn.add_css_class("titlebutton")
         self._max_btn.connect("clicked", lambda _: self._toggle_maximize())
 
-        # NOTE: this will be rendered in reverse order (right -> left)
-        self.header_bar.pack_end(close_btn)        # rightmost
-        self.header_bar.pack_end(self._max_btn)     # second from right
-        self.header_bar.pack_end(min_btn)           # third from right
-        self.header_bar.pack_end(self.hamburger)    # fourth from right
-        self.header_bar.pack_end(self.search_btn)   # leftmost (closest to center)
+        # this will be rendered in reverse order
+        self.header_bar.pack_end(close_btn)
+        self.header_bar.pack_end(self._max_btn)
+        self.header_bar.pack_end(min_btn)
+        self.header_bar.pack_end(self.hamburger)
+        self.header_bar.pack_end(self.search_btn)
 
         # double-click to maximize
         gesture = Gtk.GestureClick()
@@ -161,7 +156,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
 
         # setup search
 
-        
+
         # this is so the quick filter buttons and tag filtering in search bar
         # affect the same filters.
         self._syncing_filters = False
