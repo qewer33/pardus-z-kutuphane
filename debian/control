@@ -1,7 +1,9 @@
 Source: pardus-z-kutuphane
 Section: utils
 Priority: optional
-Maintainer: qewer <qewer@qewer.dev>
+Maintainer: Anadolu Penguenleri <yerdemergul@gmail.com>
+Uploaders: Yunus Erdem Ergül <yerdemergul@gmail.com>,
+		   Murat Yalçın <murat.yalcin3243@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                meson (>= 1.0.0),
                ninja-build,
