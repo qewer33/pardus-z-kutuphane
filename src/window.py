@@ -1,22 +1,3 @@
-# window.py
-#
-# Copyright 2026 qewer
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-
 import json
 import os
 import threading
@@ -101,22 +82,18 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
             GObject.BindingFlags.BIDIRECTIONAL,
         )
 
-        # We always draw our own window buttons (added below), so the header
-        # bar's built-in window controls must never render. Disabling them
-        # unconditionally is what prevents doubled buttons: relying on the
-        # per-system decoration layout only worked where that layout happened
-        # to be empty (e.g. Pardus etap) but doubled up on desktops whose
-        # gtk-decoration-layout still lists min/max/close (e.g. XFCE/xfwm4).
+        # we draw our window-control own buttons (for cross-compatability with Pardus ETAP)
+        # so disable built-in buttons.
         self.header_bar.set_show_title_buttons(False)
 
-        # on Wayland CSD is native, so promote the header bar as titlebar.
-        # on X11 (Pardus etap) Mutter ignores GDK decoration hints, so we use
-        # set_decorated(False) with no set_titlebar() to avoid the hidden titlebox.
+        # we use our header bar as the title bar in wayland.
+        # for x11, disable server side decoration so the wm does not
+        # add its on title bar (for Pardus ETAP which has Mutter)
         is_x11 = self.get_display().__gtype__.name == "GdkX11Display"
 
         if is_x11:
             self.set_decorated(False)
-            # undecorated X11 windows lose the WM resize border; restore it
+            # restore the edge resizing because undecorated windows lose it.
             enable_edge_resize(self)
         else:
             box = self.get_child()
@@ -124,9 +101,9 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
                 box.remove(self.header_bar)
             self.set_titlebar(self.header_bar)
 
-        # custom window buttons on the end side
-        # pack_end prepends, so the last packed child is leftmost in the end_box
-        # remove blueprint [end] children first so we can repack in the right order
+        # remove the buttons so we can order them like we want
+        # pack_end prepends what's passed to it
+        # this causes the buttons to be in reverse order (see comment below)
         self.hamburger.unparent()
         self.search_btn.unparent()
 
@@ -137,8 +114,8 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         self._max_btn.set_child(self._max_icon)
         self._max_btn.add_css_class("titlebutton")
         self._max_btn.connect("clicked", lambda _: self._toggle_maximize())
-        # pack in reverse order so the visual left-to-right is:
-        # [search_btn] [hamburger] [min_btn] [max_btn] [close_btn]
+
+        # NOTE: this will be rendered in reverse order (right -> left)
         self.header_bar.pack_end(close_btn)        # rightmost
         self.header_bar.pack_end(self._max_btn)     # second from right
         self.header_bar.pack_end(min_btn)           # third from right
@@ -152,27 +129,6 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
         gesture.connect("pressed", self._on_header_double_click)
         self.header_bar.add_controller(gesture)
         self.connect("notify::maximized", self._on_maximized_changed)
-
-        # TEMP: explicitly load libadwaita's own stylesheet so the app renders
-        # as real Adwaita even when the system GTK theme (with an incomplete
-        # gtk-4.0 port) would otherwise leave Adw widgets unstyled.
-        #adw_provider = Gtk.CssProvider()
-        #adw_provider.load_from_resource("/org/gnome/Adwaita/styles/gtk.css")
-        #Gtk.StyleContext.add_provider_for_display(
-        #    self.get_display(), adw_provider, Gtk.STYLE_PROVIDER_PRIORITY_THEME
-        #)
-
-        # TEMP: the incomplete system gtk-4.0 theme doesn't define the newer
-        # accent named colors, so accent widgets fall back to white. Provide
-        # the default Adwaita accent explicitly.
-        #accent_css = (
-        #    ":root { --accent-bg-color: #3584e4; --accent-fg-color: #ffffff; }"
-        #)
-        #accent_provider = Gtk.CssProvider()
-        #accent_provider.load_from_string(accent_css)
-        #Gtk.StyleContext.add_provider_for_display(
-        #    self.get_display(), accent_provider, Gtk.STYLE_PROVIDER_PRIORITY_THEME + 1
-        #)
 
         provider = Gtk.CssProvider()
         provider.load_from_resource("/tr/org/pardus/zkutuphane/style.css")
@@ -205,8 +161,9 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
 
         # setup search
 
-        # shared filter state: the subject tiles and the tag filter list drive
-        # the same underlying tag filter, so keep references to sync them
+        
+        # this is so the quick filter buttons and tag filtering in search bar
+        # affect the same filters.
         self._syncing_filters = False
         self._tag_checkbuttons: dict[str, Gtk.CheckButton] = {}
         self._subject_buttons: dict[str, Gtk.ToggleButton] = {}
@@ -621,6 +578,7 @@ class ZLibAppWindow(Gtk.ApplicationWindow):
                     self.add_card(card_data)
         return True
 
+    # for cross-compatible drag-and-drop on Pardus ETAP 23
     @staticmethod
     def _extract_files_ctypes(flist):
         import re, ctypes

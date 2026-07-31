@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-#
-# Quick .deb builder that works without debhelper (e.g. on Arch/CachyOS).
+
+# Quick .deb builder that works without debhelper. 
 # It stages a meson install into a DESTDIR and wraps it with dpkg-deb.
-#
+
 # For a "proper" Debian/Pardus package, build the debian/ dir in a Debian
 # container instead (see the README / packaging notes).
 
@@ -15,22 +15,23 @@ VERSION=$(dpkg-parsechangelog -SVersion)
 
 builddir=$(mktemp -d)
 destdir=$(mktemp -d)
-# dpkg-gencontrol writes a debian/files record we don't need for a manual build
+
+# remove unused files for a manual build 
 trap 'rm -rf "$builddir" "$destdir" debian/files' EXIT
 
 echo ">> meson build (prefix=/usr)"
 meson setup "$builddir" --prefix=/usr --buildtype=plain >/dev/null
 meson compile -C "$builddir" >/dev/null
+
 # DESTDIR install makes meson skip the post-install hooks; we do them in postinst
 DESTDIR="$destdir" meson install -C "$builddir" >/dev/null
 
 echo ">> generating control from debian/"
 mkdir -p "$destdir/DEBIAN"
-# reads debian/control + debian/changelog, computes Installed-Size from -P;
-# -Vmisc:Depends= just silences the substvar warning (dh would provide it)
+
 dpkg-gencontrol -p"$PKG" -P"$destdir" -Vmisc:Depends=
 
-# refresh schema/icon/desktop caches on the target system after install
+# refresh schema/icon/desktop caches in postinst
 cat > "$destdir/DEBIAN/postinst" <<'EOF'
 #!/bin/sh
 set -e

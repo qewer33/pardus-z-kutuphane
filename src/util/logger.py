@@ -6,7 +6,6 @@ from gi.repository import GLib
 APP_NAME = "tr.org.pardus.zkutuphane"
 SCHEMA_ID = "tr.org.pardus.zkutuphane"
 
-
 def _default_log_dir() -> Path:
     try:
         from gi.repository import Gio
@@ -26,7 +25,6 @@ LOG_DIR = _default_log_dir()
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_FILE = LOG_DIR / "app.log"
-
 
 class ColorFormatter(logging.Formatter):
     COLORS = {

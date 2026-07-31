@@ -1,22 +1,3 @@
-# main.py
-#
-# Copyright 2026 qewer
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-
 import sys
 from gettext import gettext as _
 
@@ -46,35 +27,30 @@ class PardusZKutuphaneApplication(Adw.Application):
         self.create_action("preferences", self.on_preferences_action)
 
     def _setup_style(self):
-        # TEMP: use libadwaita's empty base theme so only its own stylesheet
-        # (loaded explicitly in the window) styles widgets. This bypasses the
-        # system GTK theme and prevents the base theme from double-styling.
+        # bypass system theme with adwaita's empty theme for preventing double-styling.
         gtk_settings = Gtk.Settings.get_default()
         if gtk_settings is not None:
             gtk_settings.set_property("gtk-theme-name", "Adwaita-empty")
             gtk_settings.set_property("gtk-icon-theme-name", "Adwaita")
 
-        # follow the system light/dark preference explicitly; libadwaita's
-        # automatic detection relies on the xdg-desktop-portal settings, which
-        # is often unavailable on X11 sessions (e.g. Pardus/GNOME X11), causing
-        # the app to ignore the system color-scheme and stay light; reading
-        # org.gnome.desktop.interface directly keeps the app in sync everywhere
+        # follow the system light/dark preference explicitly
+        # adwaita's auto-detection did not work for Pardus ETAP 23
+        # use org.gnome.desktop.interface to get the setting.
         style_manager = Adw.StyleManager.get_default()
 
-        # the user's explicit theme choice ("system"/"light"/"dark") lives in
-        # the app's own GSettings; "system" falls back to following the desktop
+        # user's settings
         try:
             app_settings = Gio.Settings.new("tr.org.pardus.zkutuphane")
         except Exception:
             app_settings = None
 
+        # system settings
         try:
             settings = Gio.Settings.new("org.gnome.desktop.interface")
         except Exception:
             settings = None
 
-        # accessing a missing key is a fatal GLib error, so probe the schema
-        # first; the legacy boolean key was dropped from newer schemas
+        # check if keys exist to avoid fatal error
         keys = []
         if settings is not None:
             try:

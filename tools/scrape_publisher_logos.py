@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 # scrape_publisher_logos.py
-#
+
 # Tooling script (NOT part of the shipped app). It visits each publisher's
 # official website and extracts the URL of their logo image, then writes a
 # {publisher name: logo URL} map to a JSON file.
-#
-# Logos are intentionally NOT bundled with the app (that would be IP
-# infringement). This only records the public URLs; the app is expected to
-# download and cache them at runtime.
-#
+
+# We don't ship publisher logos with the application to avoid IP infringement.
+
 # The official site URLs below were found and verified via web search. To add a
 # publisher, add a verified homepage URL to SITES and re-run.
-#
+
 # Requirements: requests, beautifulsoup4
 #     pip install requests beautifulsoup4
-#
+
 # Usage:
 #     python tools/scrape_publisher_logos.py [-o publisher_logos.json]
 
@@ -26,9 +24,9 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-# publisher display name -> verified official homepage (found via web search).
-# Zirve Yayınları is intentionally absent: it has no own-brand website (only
-# marketplaces/social media). Esen and Limit are HTTP-only.
+# NOTE: We couldn't find the website of Zirve Yayınları.
+# NOTE: Esen and Limit are HTTP-only.
+
 SITES: dict[str, str] = {
     "Hız Yayınları": "https://hizyayinlari.com/",
     "İşler Yayınları": "https://isler.com.tr/",

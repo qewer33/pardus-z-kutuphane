@@ -1,21 +1,17 @@
-# csd_resize.py
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-"""Manual edge/corner resizing for undecorated X11 toplevels.
+"""
+Manual edge/corner resizing for undecorated X11 toplevels.
 
-On X11 we call ``Gtk.Window.set_decorated(False)`` to drop the server-side
-title bar (so our custom in-header window buttons don't get doubled up by the
-window manager). The side effect is that the WM also stops providing the resize
-border, and GTK only draws its own resize grips when the window is client-side
-decorated via ``set_titlebar()`` -- which the X11 path deliberately avoids.
+This is needed because we call ``Gtk.Window.set_decorated(False)`` if the
+application is running in X11. Doing so also disables the resizing border.
+GTK only draws the border if the window is client side decorated.
 
 The result is a window that cannot be resized. To restore it we watch for
 presses inside a thin hot-zone along each edge and kick off the standard EWMH
-``_NET_WM_MOVERESIZE`` request through ``GdkToplevel.begin_resize``. Both Mutter
-(Pardus etap) and xfwm4 (XFCE) honour that request even for undecorated windows,
-so the WM performs the resize for us.
+``_NET_WM_MOVERESIZE`` request through ``GdkToplevel.begin_resize``. 
 
-Only needed for undecorated X11 windows; Wayland and CSD windows already get
+This approach seems to work on the platforms we tested this application on (Pardus ETAP 23/ Pardus 25 XFCE).
+
+This is only needed for undecorated X11 windows since Wayland and CSD windows already get
 resize grips from GTK/the compositor.
 """
 
@@ -91,9 +87,9 @@ def enable_edge_resize(window: Gtk.Window) -> None:
         if surface is None or not hasattr(surface, "begin_resize"):
             return
 
-        # NB: read the timestamp via the controller, not get_current_event():
-        # older PyGObject (GTK 4.8 on Pardus etap) can't translate the raw
-        # GdkButtonEvent and raises TypeError.
+        # NOTE: we read the timestamp via the controller (not get_current_event()),
+        # this is for cross-compatability with Pardus ETAP 23
+        # the PyGObject on ETAP cannot translate raw GdkButtonEvent.
         timestamp = gesture.get_current_event_time()
         # claim the sequence so children don't also react to this press
         gesture.set_state(Gtk.EventSequenceState.CLAIMED)

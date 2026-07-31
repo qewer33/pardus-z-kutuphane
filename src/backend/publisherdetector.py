@@ -75,6 +75,7 @@ def _load_publisher_logos() -> dict[str, str]:
 
 _PUBLISHER_LOGOS = _load_publisher_logos()
 
+# user agent to prevent getting 403 on some servers
 _USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -82,6 +83,7 @@ _USER_AGENT = (
 
 
 def _cache_dir() -> Path:
+    """Find cache dir. Uses directory specified in user settings if exists. XDG_CACHE_DIR if not."""
     try:
         from gi.repository import Gio
 
@@ -101,6 +103,7 @@ def _cache_dir() -> Path:
 
 
 class PublisherIconCache:
+    """Class that is used for fetching and caching icons."""
     _CACHE_DIR: Path | None = None
 
     @classmethod
@@ -150,9 +153,8 @@ class PublisherIconCache:
                 from urllib.parse import quote
                 from urllib.request import Request, urlopen
 
-                # percent-encode non-ASCII path chars, and send a browser
-                # User-Agent so servers that 403 the default urllib agent serve
-                # the image
+                # percent encoding and set user agent for avoiding 403 (Forbidden)
+                # on some servers.
                 safe_url = quote(url, safe=":/?&=#%@+,;")
                 request = Request(safe_url, headers={"User-Agent": _USER_AGENT})
                 with urlopen(request, timeout=15) as response:

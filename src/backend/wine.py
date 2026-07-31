@@ -21,7 +21,7 @@ class WineBackend:
     def _find_real_binary(binary: str) -> str:
         """If <binary> resolves to a shell wrapper, prefer /usr/bin/<binary>.
 
-        Some distributions (e.g., Pardus etap 23) ship wine as a wrapper
+        Some distributions (e.g., Pardus ETAP 23) ship wine as a wrapper
         script earlier in PATH that overrides WINEPREFIX and other
         environment variables. Detect the wrapper and use the real
         system binary instead so our WINEPREFIX is respected.
@@ -65,7 +65,8 @@ class WineBackend:
         if not WineBackend.is_installed(wine_binary):
             raise WineError("Wine is not installed.")
 
-        # bypass wrapper scripts (e.g., Pardus etap) that override WINEPREFIX
+        # bypass wrapper scripts that override WINEPREFIX
+        # this is added for Pardus ETAP
         wineboot = WineBackend._find_real_binary("wineboot")
 
         prefix = Path(wine_prefix).expanduser()
@@ -118,7 +119,8 @@ class WineBackend:
         if not WineBackend.is_installed(wine_binary):
             raise WineError("Wine is not installed.")
 
-        # bypass wrapper scripts (e.g., Pardus etap) that override WINEPREFIX
+        # bypass wrapper scripts that override WINEPREFIX
+        # this is added for Pardus ETAP
         wine_binary = WineBackend._find_real_binary(wine_binary)
 
         if wine_prefix is not None:
